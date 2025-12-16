@@ -305,15 +305,6 @@ def di_Stokes_drift_biomass_extent_dependency(particle, fieldset, time):
         particle_dlat += stokes_V_integrated  * particle.dt 
         
 
-def wave_damping_factor(biomass):
-    
-    damping_factor = 0.5 + 0.5 * math.cos(math.pi * (biomass - 1) / 3) #+ 0.25*x
-    if biomass < 1:
-        damping_factor = 1
-    if biomass > 4:
-        damping_factor = 0
-    return damping_factor
-
 def di_Stokes_drift_wave_damping(particle, fieldset, time):
     """Depth-integrated Stokes drift kernel, with variable depth extent:
 
@@ -375,21 +366,30 @@ def di_Stokes_drift_wave_damping(particle, fieldset, time):
         stokes_U_integrated = (stokes_U * decay_function_lower - stokes_U * decay_function_upper) / delta_z
         stokes_V_integrated = (stokes_V * decay_function_lower - stokes_V * decay_function_upper) / delta_z
 
+        
+
+        # #Calculate damping factor
+        # damping_factor = 0.5 + 0.5 * math.cos(math.pi * (particle.biomass_SF3 - 1) / 3) #+ 0.25*x
+        # if particle.biomass_SF3 < 1:
+        #     damping_factor = 1.0
+        # if particle.biomass_SF3 > 4:
+        #     damping_factor = 0.0
+
+        #Adding wave damping by linear damping factor acting on Stokes drift 
+        linear_wave_damping_factor = 1.5 - 0.5*particle.biomass_SF3
+        if particle.biomass_SF3 < 1:
+            linear_wave_damping_factor = 1.0
+        if particle.biomass_SF3 > 3:
+            linear_wave_damping_factor = 0.0
+
         #Saving lower and upper decay function and total Stokes decay factor as particle variables
         particle.decay_integrated_lower = decay_function_lower
         particle.decay_integrated_upper = decay_function_upper
-        particle.decay_factor = (decay_function_lower - decay_function_upper) / delta_z
-
-        #Calculate damping factor
-        damping_factor = 0.5 + 0.5 * math.cos(math.pi * (particle.biomass_SF3 - 1) / 3) #+ 0.25*x
-        if particle.biomass_SF3 < 1:
-            damping_factor = 1.0
-        if particle.biomass_SF3 > 4:
-            damping_factor = 0.0
+        particle.decay_factor = linear_wave_damping_factor * (decay_function_lower - decay_function_upper) / delta_z
 
         #Calculate damped Stokes drift based on a biomass dependent wave damping factor
-        stokes_U_int_damped = damping_factor * stokes_U_integrated
-        stokes_V_int_damped = damping_factor * stokes_V_integrated    
+        stokes_U_int_damped = linear_wave_damping_factor * stokes_U_integrated
+        stokes_V_int_damped = linear_wave_damping_factor * stokes_V_integrated    
 
         #Compute particle displacement based on depth-integrated Stokes velocity
         particle_dlon += stokes_U_int_damped  * particle.dt  
@@ -460,11 +460,11 @@ def sampling_from_field(particle, fieldset, time):
     particle.salinity = fieldset.S[time, particle.depth, particle.lat, particle.lon]
     
     #Selecting depth at which nitrogen field is defined
-    z = particle.depth
-    if z <= 0.49402538:
-        z = 0.49402538
+    z_for_n = particle.depth
+    if z_for_n <= 0.49402538:
+        z_for_n = 0.49402538
     
-    particle.nitrogen = fieldset.no3[time, z, particle.lat, particle.lon] 
+    particle.nitrogen = fieldset.no3[time, z_for_n, particle.lat, particle.lon] 
 
 
 
