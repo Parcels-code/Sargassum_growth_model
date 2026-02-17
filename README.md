@@ -33,21 +33,21 @@ For the results, the specific folder in `data_Elena` on Lorenz where certain par
   
 ### Results
 - **Figure 4.1:** `check_feedbacks.ipynb` & particlesets in `Satellite_out` and `FINAL`
-- **Figure 4.2:** `Output_postprocessing/Output_kN.ipynb` & particlesets in `Satellite_out`
-- **Figure 4.3:** `Output_postprocessing/Output_kN.ipynb` & particlesets in `Satellite_out`
-- **Figure 4.4:** `Output_postprocessing/Output_kN.ipynb` & particlesets in `Satellite_out`
-- **Figure 4.5:** `Output_postprocessing/Output_kN.ipynb` & particlesets in `Satellite_out`
-- **Figure 4.6:** `Output_postprocessing/Output_kN.ipynb` & particlesets in `Satellite_out`
-- **Figure 4.7:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
-- **Figure 4.8:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
-- **Figure 4.9:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
-- **Figure 4.10:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure 4.2:** `OUTPUT_POSTPROCESSING/Output_kN.ipynb` & particlesets in `Satellite_out`
+- **Figure 4.3:** `OUTPUT_POSTPROCESSING/Output_kN.ipynb` & particlesets in `Satellite_out`
+- **Figure 4.4:** `OUTPUT_POSTPROCESSING/Output_kN.ipynb` & particlesets in `Satellite_out`
+- **Figure 4.5:** `OUTPUT_POSTPROCESSING/Output_kN.ipynb` & particlesets in `Satellite_out`
+- **Figure 4.6:** `OUTPUT_POSTPROCESSING/Output_kN.ipynb` & particlesets in `Satellite_out`
+- **Figure 4.7:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure 4.8:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure 4.9:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure 4.10:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
 - **Figure 4.11:** `LIMITATION_ANALYSIS.ipynb`
 - **Figure 4.12:** `check_feedbacks.ipynb` & particlesets in `Satellite_out` and `FINAL`
 
 ### Appendices
-- **Figure A.1:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
-- **Figure A.2:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
-- **Figure A.3:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
-- **Figure B.1:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
-- **Figure C.1:** `Output_postprocessing/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure A.1:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure A.2:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure A.3:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure B.1:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
+- **Figure C.1:** `OUTPUT_POSTPROCESSING/Output_12months.ipynb` & particlesets in `FINAL`
