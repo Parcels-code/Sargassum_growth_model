@@ -9,3 +9,6 @@
 Input_data_test/
 THESIS_PLOTS/
 output_plots/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
