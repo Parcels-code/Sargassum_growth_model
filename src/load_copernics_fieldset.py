@@ -33,7 +33,7 @@ def create_fieldset():
             minimum_latitude=-4,
             maximum_latitude=24,
             start_datetime="2024-07-01T00:00:00",
-            end_datetime="2024-07-31T00:00:00",
+            end_datetime="2024-08-01T00:00:00",
             minimum_depth=0.5,
             maximum_depth=0.5,
             output_filename=filename,
