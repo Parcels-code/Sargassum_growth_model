@@ -13,3 +13,7 @@ parcels = {path = "/Users/erik/Codes/parcels"}
 ipykernel = ">=7.2.0,<8"
 cmocean = ">=4.0.3,<5"
 copernicusmarine = ">=2.3.0,<3"
+setuptools = "*"
+
+[pypi-dependencies]
+sargassum-growth-model = { path = ".", editable = true }
