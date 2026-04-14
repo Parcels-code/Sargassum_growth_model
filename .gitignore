@@ -11,3 +11,4 @@ output_plots/
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+**.DS_Store
