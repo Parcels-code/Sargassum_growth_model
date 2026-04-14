@@ -2,6 +2,32 @@ import parcels
 import numpy as np
 from scipy.special import erfc
 
+SargassumParticle = parcels.Particle.add_variable(
+        [
+            parcels.Variable('temperature', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('salinity', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('depth_extent', dtype=np.float32, to_write=True, initial=1),
+            parcels.Variable('nitrogen', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('biomass_SF3', dtype=np.float32, to_write=True, initial=1),
+            parcels.Variable('biomass_SN1', dtype=np.float32, to_write=True, initial=1),
+            parcels.Variable('biomass_SN8', dtype=np.float32, to_write=True, initial=1),
+            parcels.Variable('biomass_loss', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('stranded', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('limitation', dtype=np.float32, to_write=True, initial=1),
+            parcels.Variable('lim_salinity', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('lim_temp', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('lim_no3', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('speed_currents', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('speed_stokes', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('speed_wind', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('decay_factor', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('decay_averaged', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('decay_integrated_lower', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('decay_integrated_upper', dtype=np.float32, to_write=True, initial=0),
+            parcels.Variable('wind_coefficient', dtype=np.float32, to_write=True, initial=0.01),
+        ]
+    )
+
 def di_Stokes_drift(particles, fieldset):
     """Depth-integrated Stokes drift kernel:
 
