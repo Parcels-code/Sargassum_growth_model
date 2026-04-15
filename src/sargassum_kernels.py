@@ -185,9 +185,6 @@ def sargassum_biological_growth_model(particles, fieldset):
     T_max = 31      #degC
     T_opt = 27.5    #degC
 
-    #Nitrogen half saturation constant
-    k_N  = 0.001 #mmol/m3
-
     #Optimal salinity
     S_opt = 36 #psu
 
@@ -199,7 +196,7 @@ def sargassum_biological_growth_model(particles, fieldset):
 
     #GROWTH LIMITATION FUNCTION DEPENDENT ON NITROGEN AVAILABILTIY
     #Formulation from Bonner et al. (2024)
-    limitation_factor_N = particles.nitrogen / ( k_N + particles.nitrogen )
+    limitation_factor_N = particles.nitrogen / ( fieldset.k_N + particles.nitrogen )
 
     #GROWTH LIMITATION FUNCTION DEPENDENT ON SALINITY
     #Formula from Jouanno et al. (2025)
