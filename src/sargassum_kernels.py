@@ -50,20 +50,15 @@ def di_Stokes_drift(particles, fieldset):
     [2] Li et al. (2017) - http://dx.doi.org/10.1016/j.ocemod.2017.03.016
     """
 
-    #Only computing Stokes drift if the peak wave period is large enough
-    T_p = fieldset.VTPK[particles]
-    in_wave = T_p > 1E-14
-    ptcls_wave = particles[in_wave]
-    T_p = T_p[in_wave]
-
-    delta_z = ptcls_wave.depth_extent - ptcls_wave.z
-    z_up = ptcls_wave.z
-    z_low = z_up + ptcls_wave.depth_extent
+    delta_z = particles.depth_extent - particles.z
+    z_up = particles.z
+    z_low = z_up + particles.depth_extent
 
     #Sampling the U / V components of Stokes drift at upper level
-    stokes_U, stokes_V = fieldset.UVStokes[ptcls_wave]
+    stokes_U, stokes_V = fieldset.UVStokes[particles]
 
     #Sampling the peak wave period and wave number at the particle locations
+    T_p = np.maximum(fieldset.VTPK[particles], 1E-14)
     omega_p = 2. * np.pi / T_p
     k_p = (omega_p ** 2) / fieldset.G
 
@@ -86,13 +81,13 @@ def di_Stokes_drift(particles, fieldset):
     stokes_V_integrated = (stokes_V * decay_function_lower - stokes_V * decay_function_upper) / delta_z
 
     #Saving lower and upper decay function and total Stokes decay factor as particle variables
-    ptcls_wave.decay_integrated_lower = decay_function_lower
-    ptcls_wave.decay_integrated_upper = decay_function_upper
-    ptcls_wave.decay_factor = (decay_function_lower - decay_function_upper) / delta_z
+    particles.decay_integrated_lower = decay_function_lower
+    particles.decay_integrated_upper = decay_function_upper
+    particles.decay_factor = (decay_function_lower - decay_function_upper) / delta_z
 
     #Compute particle displacement based on depth-integrated Stokes velocity
-    ptcls_wave.dlon += stokes_U_integrated * ptcls_wave.dt
-    ptcls_wave.dlat += stokes_V_integrated * ptcls_wave.dt
+    particles.dlon += stokes_U_integrated * particles.dt
+    particles.dlat += stokes_V_integrated * particles.dt
 
 
 def windage_drift(particles, fieldset):
