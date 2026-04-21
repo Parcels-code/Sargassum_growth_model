@@ -2,11 +2,16 @@ import copernicusmarine
 import os
 import parcels
 import xarray as xr
+import numpy as np
 
-def create_fieldset():
+def create_fieldset(startmonth="2024-07"):
     # TODO make this on-the-fly access instead of downloading the file first and then loading it
 
-    dirname = "/Users/erik/Desktop/FromElena/copernicus_marine_data"
+    startdate = np.datetime64(f"{startmonth}-01T00:00:00")
+    enddate = startdate + np.timedelta64(31, "D")
+    start_datetime = np.datetime_as_string(startdate, unit="s")
+    end_datetime = np.datetime_as_string(enddate, unit="s")
+    dirname = "/Users/erik/Desktop/FromElena/copernicus_marine_data/copernicusmarine"
 
     DATASET_IDs = [
         "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
@@ -20,7 +25,7 @@ def create_fieldset():
     filenames = ["cur.nc", "so.nc", "thetao.nc", "no3.nc", "stokes.nc", "wind.nc"]
     for i in range(len(DATASET_IDs)):
 
-        filename = f"{dirname}_{filenames[i]}"
+        filename = f"{dirname}_{startmonth}_{filenames[i]}"
         if os.path.exists(filename):
                     print(f"File {filename} already exists, skipping...")
                     continue
@@ -32,8 +37,8 @@ def create_fieldset():
             maximum_longitude=-10,
             minimum_latitude=-4,
             maximum_latitude=24,
-            start_datetime="2024-07-01T00:00:00",
-            end_datetime="2024-08-01T00:00:00",
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
             minimum_depth=0.5,
             maximum_depth=0.5,
             output_filename=filename,
@@ -42,7 +47,7 @@ def create_fieldset():
     fields = []
 
     for i in range(len(filenames)):
-        filename = f"{dirname}_{filenames[i]}"
+        filename = f"{dirname}_{startmonth}_{filenames[i]}"
 
         print(f"Loading {filename}")
         ds_fields = xr.open_mfdataset(filename, combine="by_coords")
