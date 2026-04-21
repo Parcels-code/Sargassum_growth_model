@@ -19,7 +19,7 @@ release_lon = pts.longitude.where(pts, drop=True).values
 release_lat = pts.latitude.where(pts, drop=True).values
 
 for type in ['Eulerian', 'Lagrangian']:
-    for month in range(1, 12):
+    for month in range(1, 13):
         startmonth = f"2024-{month:02d}"
         fieldset = load_copernics_fieldset.create_fieldset(startmonth=startmonth)
 
