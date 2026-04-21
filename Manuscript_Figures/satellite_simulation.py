@@ -21,7 +21,7 @@ start_images = [
 ]
 release_lon, release_lat, _ = sarg_grid_from_sat(start_images, coarse=True)
 
-fieldset = load_copernics_fieldset.create_fieldset()
+fieldset = load_copernics_fieldset.create_fieldset(startmonth="2024-07")
 
 #TODO these can be removed as fieldset constants
 fieldset.add_constant('G', 9.81)  # Gravitational constant [m s-1]
