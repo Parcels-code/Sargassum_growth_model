@@ -256,7 +256,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pthread-stubs-0.4-hd74edd7_1002.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/ptyprocess-0.7.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pure_eval-0.2.3-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/py-triangle-20250106-py314hb84d1df_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyarrow-23.0.1-py314he55896b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyarrow-core-23.0.1-py314h109bba2_0_cpu.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pycparser-2.22-pyh29332c3_1.conda
@@ -3702,7 +3701,7 @@ packages:
   - netcdf4 >=1.6.0
   - numpy >=2.1.0
   - tqdm >=4.50.0
-  - xarray >=2024.5.0
+  - xarray >=2024.5.0,<2026.4.0
   - holoviews >=1.22.0
   - uxarray >=2025.3.0
   - dask >=2024.5.1
@@ -3711,7 +3710,6 @@ packages:
   - cf_xarray >=0.8.6
   - cftime >=1.6.3
   - pooch >=1.8.0
-  - py-triangle >=20250106,<20250107
   sources:
     xgcm:
       git: https://github.com/xgcm/xgcm
@@ -3959,20 +3957,6 @@ packages:
   - pkg:pypi/pure-eval?source=hash-mapping
   size: 16668
   timestamp: 1733569518868
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/py-triangle-20250106-py314hb84d1df_4.conda
-  sha256: cb09ae81a495a72b56747dd4ad9a9fa639af6e1c7c10901fa73770a771ee2cbe
-  md5: c3ae1fa157a8630c2e437c5f16a030c2
-  depends:
-  - __osx >=11.0
-  - numpy
-  - python >=3.14.0rc2,<3.15.0a0
-  - python >=3.14.0rc2,<3.15.0a0 *_cp314
-  - python_abi 3.14.* *_cp314
-  license: LGPL and Triangle
-  purls:
-  - pkg:pypi/triangle?source=hash-mapping
-  size: 1211829
-  timestamp: 1756903669666
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyarrow-23.0.1-py314he55896b_0.conda
   sha256: 9b6b96a1c28afe232318ad6e687d1faa80757e68f18f2450d3586311ca2408d4
   md5: 45a5bd7badeac5f9174c5aa9f01709e0
