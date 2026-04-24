@@ -244,8 +244,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pillow-12.1.1-py314hab283cf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.9.4-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/polars-1.39.2-pyh58ad624_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/polars-runtime-32-1.39.2-py310h216a1ac_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/polars-1.40.0-pyh58ad624_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/polars-runtime-32-1.40.0-py310h216a1ac_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pooch-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/proj-9.8.0-hfb14a63_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/prometheus-cpp-1.3.0-h0967b3e_0.conda
@@ -3702,6 +3702,8 @@ packages:
   - numpy >=2.1.0
   - tqdm >=4.50.0
   - xarray >=2024.5.0,<2026.4.0
+  - pandas >=2.2
+  - pyarrow >=20.0.0
   - holoviews >=1.22.0
   - uxarray >=2025.3.0
   - dask >=2024.5.1
@@ -3785,11 +3787,11 @@ packages:
   - pkg:pypi/platformdirs?source=compressed-mapping
   size: 25646
   timestamp: 1773199142345
-- conda: https://conda.anaconda.org/conda-forge/noarch/polars-1.39.2-pyh58ad624_0.conda
-  sha256: f8585bb56153d4731fef07d07ff6d046b49eb4eac10a809f97af072d51697e39
-  md5: 864d9058d966bd37c8584b6161dc79a9
+- conda: https://conda.anaconda.org/conda-forge/noarch/polars-1.40.0-pyh58ad624_0.conda
+  sha256: c3da6a82313020b690b556df64062aaa440f26ef5ce5ced6e7a5f5343061893e
+  md5: fd16be490f5403adfbf27dd4901bbe34
   depends:
-  - polars-runtime-32 ==1.39.2
+  - polars-runtime-32 ==1.40.0
   - python >=3.10
   - python
   constrains:
@@ -3803,23 +3805,23 @@ packages:
   - pyiceberg >=0.7.1
   - altair >=5.4.0
   - great_tables >=0.8.0
-  - polars-runtime-32 ==1.39.2
-  - polars-runtime-64 ==1.39.2
-  - polars-runtime-compat ==1.39.2
+  - polars-runtime-32 ==1.40.0
+  - polars-runtime-64 ==1.40.0
+  - polars-runtime-compat ==1.40.0
   license: MIT
   license_family: MIT
   purls:
   - pkg:pypi/polars?source=hash-mapping
-  size: 533509
-  timestamp: 1773797836417
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/polars-runtime-32-1.39.2-py310h216a1ac_0.conda
+  size: 536257
+  timestamp: 1776563396053
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/polars-runtime-32-1.40.0-py310h216a1ac_0.conda
   noarch: python
-  sha256: 7a992ab09158bfda8261abc36b2bafb72187e772704ea4916b4005ad7d39ffdb
-  md5: 83e16e827fe811a91fc7cb5e2730df3a
+  sha256: 6a827be3c25fe0044a94a2437fe038a0af6ab65b3d90d3cbd513a83c9b69af39
+  md5: 1ebdb204ac27d15be71ff527cf934454
   depends:
   - python
-  - libcxx >=19
   - __osx >=11.0
+  - libcxx >=19
   - _python_abi3_support 1.*
   - cpython >=3.10
   constrains:
@@ -3828,8 +3830,8 @@ packages:
   license_family: MIT
   purls:
   - pkg:pypi/polars-runtime-32?source=hash-mapping
-  size: 32979098
-  timestamp: 1773797724553
+  size: 35948230
+  timestamp: 1776563261192
 - conda: https://conda.anaconda.org/conda-forge/noarch/pooch-1.9.0-pyhd8ed1ab_0.conda
   sha256: 081e52c4612830bf1fd4a9c78eebaf335d1385d74ddfd328b1b2f26b983848eb
   md5: dd4b6337bf8886855db6905b336db3c8
