@@ -21,7 +21,7 @@ release_lat = pts.latitude.where(pts, drop=True).values
 for type in ['Eulerian', 'Lagrangian']:
     for month in range(1, 13):
         startmonth = f"2024-{month:02d}"
-        filename = f"Simulation_Basin_{startmonth}_{type}.zarr"
+        filename = f"Simulations/Simulation_Basin_{startmonth}_{type}.parquet"
 
         if not os.path.exists(filename):
             print(f"Running simulation for {startmonth} ({type})...")
@@ -50,7 +50,6 @@ for type in ['Eulerian', 'Lagrangian']:
             pfile = parcels.ParticleFile(
                 filename,
                 outputdt=np.timedelta64(2, 'h'),
-                chunks = (len(release_lon), 50),
             )
 
             if type == 'Eulerian':
