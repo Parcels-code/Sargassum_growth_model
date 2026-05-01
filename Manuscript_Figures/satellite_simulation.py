@@ -34,8 +34,8 @@ fieldset.add_constant('MGR_SN8', 0.053)
 #Set initial weight
 fieldset.add_constant('initial_weight', 50) #grams
 
-for k_N in [0.000129, 0.001, 0.01]:
-    filename = f"Simulation_Satellite_kN_{k_N}.parquet"
+for k_N in [0.001, 0.000129, 0.01]:
+    filename = f"Simulations/Simulation_Satellite_kN_{k_N}.parquet"
 
     fieldset.k_N = k_N
 
