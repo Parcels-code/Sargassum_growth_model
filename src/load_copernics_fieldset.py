@@ -11,7 +11,7 @@ def create_fieldset(startmonth="2024-07"):
     enddate = startdate + np.timedelta64(31, "D")
     start_datetime = np.datetime_as_string(startdate, unit="s")
     end_datetime = np.datetime_as_string(enddate, unit="s")
-    dirname = "/Users/erik/Desktop/FromElena/copernicus_marine_data/copernicusmarine"
+    dirname = "/home/evansebill/CopernicusMarine_data/copernicusmarine"
 
     DATASET_IDs = [
         "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
