@@ -9,19 +9,11 @@ import src.load_copernics_fieldset as load_copernics_fieldset  # noqa: E402
 from src.sargassum_kernels import SargassumParticle  # noqa: E402
 import src.sargassum_kernels as sargassum_kernels  # noqa: E402
 
-# Set release points based on the uo field
-release_spacing = 2 #This is the spacing in the original grid (1/12 deg) at which we will select points for release.
-ufile = xr.open_dataset('/Users/erik/Desktop/FromElena/copernicus_marine_data/copernicusmarine_2024-01_cur.nc')
-u_coarse = ufile.uo.isel(time=0, depth=0, longitude=slice(None, None, release_spacing), latitude=slice(None, None, release_spacing))
-valid = u_coarse.notnull()
-pts = valid.stack(points=("latitude", "longitude"))
-release_lon = pts.longitude.where(pts, drop=True).values
-release_lat = pts.latitude.where(pts, drop=True).values
 
 for type in ['Eulerian', 'Lagrangian']:
     for month in range(1, 13):
         startmonth = f"2024-{month:02d}"
-        filename = f"Simulation_Basin_{startmonth}_{type}.zarr"
+        filename = f"Simulations/Simulation_Basin_{startmonth}_{type}.parquet"
 
         if not os.path.exists(filename):
             print(f"Running simulation for {startmonth} ({type})...")
@@ -38,6 +30,14 @@ for type in ['Eulerian', 'Lagrangian']:
             #Set initial weight
             fieldset.add_constant('initial_weight', 50) #grams
 
+            # Set release points based on the uo field
+            release_spacing = 2 #This is the spacing in the original grid (1/12 deg) at which we will select points for release.
+            u_coarse = fieldset.U.data.isel(time=0, depth=0, lon=slice(None, None, release_spacing), lat=slice(None, None, release_spacing))
+            valid = u_coarse.notnull()
+            pts = valid.stack(points=("lat", "lon"))
+            release_lon = pts.lon.where(pts, drop=True).values
+            release_lat = pts.lat.where(pts, drop=True).values
+
             pset = parcels.ParticleSet(
                 fieldset=fieldset,
                 pclass = SargassumParticle,
@@ -50,7 +50,6 @@ for type in ['Eulerian', 'Lagrangian']:
             pfile = parcels.ParticleFile(
                 filename,
                 outputdt=np.timedelta64(2, 'h'),
-                chunks = (len(release_lon), 50),
             )
 
             if type == 'Eulerian':
