@@ -1,0 +1,21 @@
+[workspace]
+authors = ["Erik van Sebille <erikvansebille@gmail.com>"]
+channels = ["conda-forge"]
+name = "Sargassum_growth_model"
+platforms = ["osx-arm64", "linux-64"]
+version = "0.1.0"
+preview = ["pixi-build"]
+
+[tasks]
+
+[dependencies]
+parcels = {path = "../Parcels"}
+ipykernel = ">=7.2.0,<8"
+cmocean = ">=4.0.3,<5"
+copernicusmarine = ">=2.3.0,<3"
+setuptools = "*"
+jupyter = ">=1.1.1,<2"
+polars = ">=1.40.0,<2"
+
+[pypi-dependencies]
+sargassum-growth-model = { path = ".", editable = true }

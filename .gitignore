@@ -1,11 +1,15 @@
-**.png**
-**.e**
+**.egg-info**
 **.o**
 **.mp4**
 **.pyc**
 **.GIF**
 **.sh**
 **.zarr**
+**.parquet**
 Input_data_test/
 THESIS_PLOTS/
 output_plots/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+**.DS_Store
