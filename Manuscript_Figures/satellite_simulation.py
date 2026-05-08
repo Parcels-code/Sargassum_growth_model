@@ -23,21 +23,20 @@ release_lon, release_lat, _ = sarg_grid_from_sat(start_images, coarse=True)
 
 fieldset = load_copernics_fieldset.create_fieldset(startmonth="2024-07")
 
-#TODO these can be removed as fieldset constants
-fieldset.add_constant('G', 9.81)  # Gravitational constant [m s-1]
-# #Nitrogen half saturation constant
-fieldset.add_constant('k_N', 0.001) #mmol/m3
-#Overall maximal growth rate (Corbin & Oxenford)
-fieldset.add_constant('MGR_SF3', 0.124)
-fieldset.add_constant('MGR_SN1', 0.083)
-fieldset.add_constant('MGR_SN8', 0.053)
-#Set initial weight
-fieldset.add_constant('initial_weight', 50) #grams
-
 for k_N in [0.001, 0.000129, 0.01]:
     filename = f"Simulations/Simulation_Satellite_kN_{k_N}.parquet"
 
-    fieldset.k_N = k_N
+    # Model parameters
+    fieldset.z_upper = 0       # Upper depth extent of Sargassum (meter)
+    fieldset.z_lower = 1       # Lower depth extent of Sargassum (meter)
+    fieldset.wind_coeff = 0.01 # Windage coefficient (fraction)
+    fieldset.mu_max = 0.095    # Maximum_growth_rate (doublings/day)
+    fieldset.mort = 0.025      # Mortality relative loss/day
+    fieldset.T_min = 20        # Minimum temperature (degC)
+    fieldset.T_opt = 27.5      # Optimal temperature (degC)
+    fieldset.T_max = 31        # Maximum temperature (degC)
+    fieldset.S_opt = 36        # Optimal salinity (psu)
+    fieldset.k_N = k_N         # Nitrogen half saturation constant (mmol/m3)
 
     pset = parcels.ParticleSet(
         fieldset=fieldset,
@@ -54,11 +53,11 @@ for k_N in [0.001, 0.000129, 0.01]:
     )
 
     kernels = [
-        parcels.kernels.AdvectionRK4,
+        parcels.kernels.AdvectionRK2,
         sargassum_kernels.di_Stokes_drift,
         sargassum_kernels.windage_drift,
-        sargassum_kernels.sargassum_biological_growth_model,
         sargassum_kernels.stranding,
+        sargassum_kernels.sargassum_biological_growth_model,
         sargassum_kernels.DeleteOutOfBounds,
     ]
 
