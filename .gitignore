@@ -6,6 +6,7 @@
 **.sh**
 **.zarr**
 **.parquet**
+**SaWS_downloads**
 Input_data_test/
 THESIS_PLOTS/
 output_plots/
