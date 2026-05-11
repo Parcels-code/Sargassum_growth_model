@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 
+import regionmask
 import parcels
 
 import src.load_copernics_fieldset as load_copernics_fieldset  # noqa: E402
@@ -33,8 +34,11 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
         # Set release points based on the uo field
         release_spacing = 6 #This is the spacing in the original grid (1/12 deg) at which we will select points for release.
         u_coarse = fieldset.U.data.isel(time=0, depth=0, lon=slice(None, None, release_spacing), lat=slice(None, None, release_spacing))
-        valid = u_coarse.notnull()
-        pts = valid.stack(points=("lat", "lon"))
+        basins = regionmask.defined_regions.natural_earth_v5_1_2.ocean_basins_50
+        mask = basins.mask(u_coarse)
+        pacific_ids = [3, 4]  # These are the IDs for the Pacific Ocean in the regionmask ocean basins dataset.
+        u_coarse = mask.where(~np.isin(mask, pacific_ids))
+        pts = u_coarse.where(u_coarse != 0).stack(points=("lat", "lon")).dropna("points")
         release_lon = pts.lon.where(pts, drop=True).values
         release_lat = pts.lat.where(pts, drop=True).values
 
