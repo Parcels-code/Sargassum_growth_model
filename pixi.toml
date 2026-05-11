@@ -16,7 +16,6 @@ copernicusmarine = ">=2.3.0,<3"
 setuptools = "*"
 jupyter = ">=1.1.1,<2"
 polars = ">=1.40.0,<2"
-regionmask = ">=0.13.0,<0.14"
 
 [pypi-dependencies]
 sargassum-growth-model = { path = ".", editable = true }
