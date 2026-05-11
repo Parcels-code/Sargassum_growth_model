@@ -11,7 +11,8 @@ def create_fieldset(startmonth="2024-07"):
     enddate = startdate + np.timedelta64(31, "D")
     start_datetime = np.datetime_as_string(startdate, unit="s")
     end_datetime = np.datetime_as_string(enddate, unit="s")
-    dirname = "/home/evansebill/CopernicusMarine_data/copernicusmarine"
+    dirname = "/Users/erik/Desktop/FromElena/copernicus_marine_data/"
+    os.makedirs(dirname, exist_ok=True)
 
     DATASET_IDs = [
         "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
@@ -25,29 +26,26 @@ def create_fieldset(startmonth="2024-07"):
     filenames = ["cur.nc", "so.nc", "thetao.nc", "no3.nc", "stokes.nc", "wind.nc"]
     for i in range(len(DATASET_IDs)):
 
-        filename = f"{dirname}_{startmonth}_{filenames[i]}"
-        if os.path.exists(filename):
-                    print(f"File {filename} already exists, skipping...")
-                    continue
-
-        copernicusmarine.subset(
-            dataset_id=DATASET_IDs[i],
-            variables=variables[i],
-            minimum_longitude=-75,
-            maximum_longitude=-10,
-            minimum_latitude=-4,
-            maximum_latitude=24,
-            start_datetime=start_datetime,
-            end_datetime=end_datetime,
-            minimum_depth=0.5,
-            maximum_depth=0.5,
-            output_filename=filename,
-        )
+        filename = f"{dirname}copernicusmarine_{startmonth}_{filenames[i]}"
+        if not os.path.exists(filename):
+            copernicusmarine.subset(
+                dataset_id=DATASET_IDs[i],
+                variables=variables[i],
+                minimum_longitude=-100,
+                maximum_longitude=20,
+                minimum_latitude=-4,
+                maximum_latitude=30,
+                start_datetime=start_datetime,
+                end_datetime=end_datetime,
+                minimum_depth=0.5,
+                maximum_depth=0.5,
+                output_filename=filename,
+            )
 
     fields = []
 
     for i in range(len(filenames)):
-        filename = f"{dirname}_{startmonth}_{filenames[i]}"
+        filename = f"{dirname}copernicusmarine_{startmonth}_{filenames[i]}"
 
         print(f"Loading {filename}")
         ds_fields = xr.open_mfdataset(filename, combine="by_coords")
