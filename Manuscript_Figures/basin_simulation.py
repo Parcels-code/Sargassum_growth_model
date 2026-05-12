@@ -3,7 +3,6 @@ import os
 import numpy as np
 from scipy.ndimage import label
 
-import regionmask
 import parcels
 
 import src.load_copernics_fieldset as load_copernics_fieldset  # noqa: E402
@@ -72,6 +71,7 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
             sargassum_kernels.WindageRK2,
             sargassum_kernels.SargassumBiologicalGrowthModel,
             sargassum_kernels.DeleteOutOfBounds,
+            sargassum_kernels.DeleteInterpolationError,
         ]
 
         pset.execute(

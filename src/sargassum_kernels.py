@@ -203,3 +203,8 @@ def SargassumBiologicalGrowthModel(particles, fieldset):
 def DeleteOutOfBounds(particles, fieldset):
     out_of_bounds = particles.state == parcels.StatusCode.ErrorOutOfBounds
     particles[out_of_bounds].state = parcels.StatusCode.Delete
+
+
+def DeleteInterpolationError(particles, fieldset):
+    interpolation_error = particles.state == parcels.StatusCode.ErrorInterpolation
+    particles[interpolation_error].state = parcels.StatusCode.Delete
