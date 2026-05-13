@@ -37,6 +37,10 @@ def sarg_grid_from_sat(date, stride=8):
         lons = upper_left_lon + pixel_size_lon * np.arange(img.size[0])
         lats = upper_left_lat + pixel_size_lat * np.arange(img.size[1])
 
+        # Treat (near-)white pixels as black
+        white_mask = np.all(img_array >= 245, axis=2)
+        img_array[white_mask] = [0, 0, 0]
+
         #Computing brightness by approximating average or weighted sum of RGB
         brightness = img_array.mean(axis=2)
 
@@ -95,7 +99,21 @@ def download_images(date):
     outdir = "SaWS_downloads"
     os.makedirs(outdir, exist_ok=True)
 
-    regions = ["GOG", "C_ATLANTIC", "CE_ATLANTIC", "ECARIB", "PANAMA", "JAMAICA", "YUCATAN", "GCOOS"]
+    regions = [
+        "ANGOLA",
+        "GOG",
+        "C_ATLANTIC",
+        "CE_ATLANTIC",
+        "N_BRAZIL",
+        "ECARIB",
+        "PANAMA",
+        "JAMAICA",
+        "YUCATAN",
+        "GCOOS",
+        "SECOORA",
+        "BERMUDA",
+    ]
+
     images = []
     for region in regions:
         base = f"https://optics.marine.usf.edu/subscription/modis/{region}/{year}/comp/{doy}/"
