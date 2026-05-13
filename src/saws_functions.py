@@ -12,7 +12,7 @@ from PIL import Image
 from scipy.ndimage import binary_dilation
 
 
-def sarg_grid_from_sat(date, stride=8):
+def release_points_from_SaWS_images(date, stride=8):
 
     images = download_images(date)
     all_lons = []

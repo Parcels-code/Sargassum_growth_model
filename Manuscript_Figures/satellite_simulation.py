@@ -5,11 +5,11 @@ import numpy as np
 import parcels
 
 import src.load_copernics_fieldset as load_copernics_fieldset  # noqa: E402
-from src.saws_functions import sarg_grid_from_sat  # noqa: E402
+from src.saws_functions import release_points_from_SaWS_images  # noqa: E402
 from src.sargassum_kernels import SargassumParticle  # noqa: E402
 import src.sargassum_kernels as sargassum_kernels  # noqa: E402
 
-coords = sarg_grid_from_sat(datetime(2024,7,1), stride=8)
+coords = release_points_from_SaWS_images(datetime(2024,7,1), stride=8)
 
 fieldset = load_copernics_fieldset.create_fieldset(startmonth="2024-07")
 
