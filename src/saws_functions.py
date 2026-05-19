@@ -3,6 +3,7 @@ from datetime import datetime
 import fnmatch
 import requests
 from bs4 import BeautifulSoup
+from glob import glob
 from urllib.parse import urljoin
 
 import numpy as np
@@ -96,7 +97,7 @@ def download_images(date):
     doy = date.timetuple().tm_yday
     year = date.year
 
-    outdir = "SaWS_downloads"
+    outdir = os.path.join("SaWS_downloads", date.strftime("%Y-%m-%d"))
     os.makedirs(outdir, exist_ok=True)
 
     regions = [
@@ -116,34 +117,39 @@ def download_images(date):
 
     images = []
     for region in regions:
-        base = f"https://optics.marine.usf.edu/subscription/modis/{region}/{year}/comp/{doy}/"
-        html = requests.get(base, timeout=30)
-        html.raise_for_status()
-
-        soup = BeautifulSoup(html.text, "html.parser")
-        links = [urljoin(base, a["href"]) for a in soup.select("a[href]")]
-
         pattern = f"C*.1KM.{region}.7DAY.L3D.FA_UNET_DENSITY.png"
-        for url in links:
-            name = url.split("/")[-1]
-            if fnmatch.fnmatch(name, pattern):
-                out_path = os.path.join(outdir, name)
-                images.append(out_path)
 
-                if not os.path.exists(out_path):
+        # check if file already exists
+        matches = glob(f"{outdir}/{pattern}")
+        if matches:
+            out_path = matches[0]
+        else:
+            base = f"https://optics.marine.usf.edu/subscription/modis/{region}/{year}/comp/{doy}/"
+            html = requests.get(base, timeout=30)
+            html.raise_for_status()
+
+            soup = BeautifulSoup(html.text, "html.parser")
+            links = [urljoin(base, a["href"]) for a in soup.select("a[href]")]
+
+            for url in links:
+                name = url.split("/")[-1]
+                if fnmatch.fnmatch(name, pattern):
+                    out_path = os.path.join(outdir, name)
                     r = requests.get(url, timeout=60)
                     r.raise_for_status()
                     with open(out_path, "wb") as f:
                         f.write(r.content)
                     print(f"Downloaded {name} from SaWS server")
 
-                pgw_name = name.replace(".png", ".pgw")
-                pgw_path = os.path.join(outdir, pgw_name)
-                if not os.path.exists(pgw_path):
-                    url_pgw = f"https://optics.marine.usf.edu/cgi-bin/geo_reference?name=/{name}"
-                    r = requests.get(url_pgw, timeout=60)
-                    r.raise_for_status()
-                    with open(pgw_path, "wb") as f:
-                        f.write(r.content)
-                    print(f"Downloaded {pgw_name} from SaWS server")
+        images.append(out_path)
+
+        # Also download the pgw georeference coordinates files
+        pgw_path = out_path.replace(".png", ".pgw")
+        if not os.path.exists(pgw_path):
+            url_pgw = f"https://optics.marine.usf.edu/cgi-bin/geo_reference?name=/{name}"
+            r = requests.get(url_pgw, timeout=60)
+            r.raise_for_status()
+            with open(pgw_path, "wb") as f:
+                f.write(r.content)
+            print(f"Downloaded {pgw_path} from SaWS server")
     return images
