@@ -149,6 +149,21 @@ def Stranding(particles, fieldset):
     particles.dlat = np.where(particles.stranded == True, 0.0, particles.dlat)
     # particles[particles.stranded == True].state = parcels.StatusCode.Delete
 
+
+def TemperatureGrowthFactor(temperature, fieldset):
+    limT_left = np.exp(-2 * ( (temperature - fieldset.T_opt)/ (fieldset.T_min - fieldset.T_opt))**2 )
+    limT_right = np.exp(-2 * ( (temperature - fieldset.T_opt)/ (fieldset.T_max - fieldset.T_opt))**2 )
+    return np.where(temperature < fieldset.T_opt, limT_left, limT_right)
+
+
+def NitrogenGrowthFactor(nitrogen, fieldset):
+    return nitrogen / ( fieldset.k_N + nitrogen )
+
+
+def SalinityGrowthFactor(salinity, fieldset):
+    return np.exp(-0.02 * (fieldset.S_opt - salinity)**2 )
+
+
 def SargassumBiologicalGrowthModel(particles, fieldset):
     """Sargassum biological growth kernel.
 
@@ -181,17 +196,15 @@ def SargassumBiologicalGrowthModel(particles, fieldset):
 
     # Growth limitation function for temperature, based on Jouanno et al. (2025).
     ptcls_afloat.temperature = fieldset.thetao[ptcls_afloat]
-    limT_left = np.exp(-2 * ( (ptcls_afloat.temperature - fieldset.T_opt)/ (fieldset.T_min - fieldset.T_opt))**2 )
-    limT_right = np.exp(-2 * ( (ptcls_afloat.temperature - fieldset.T_opt)/ (fieldset.T_max - fieldset.T_opt))**2 )
-    ptcls_afloat.lim_temperature = np.where(ptcls_afloat.temperature < fieldset.T_opt, limT_left, limT_right)
+    ptcls_afloat.lim_temperature = TemperatureGrowthFactor(ptcls_afloat.temperature, fieldset)
 
     # Growth limitation function for nitrogen, based on Bonner et al. (2024)
     ptcls_afloat.nitrogen = fieldset.no3[ptcls_afloat]
-    ptcls_afloat.lim_nitrogen = ptcls_afloat.nitrogen / ( fieldset.k_N + ptcls_afloat.nitrogen )
+    ptcls_afloat.lim_nitrogen = NitrogenGrowthFactor(ptcls_afloat.nitrogen, fieldset)
 
     # Growth limitation function for salinity, based on Jouanno et al. (2025)
     ptcls_afloat.salinity = fieldset.so[ptcls_afloat]
-    ptcls_afloat.lim_salinity = np.exp(-0.02 * (fieldset.S_opt - ptcls_afloat.salinity)**2 )
+    ptcls_afloat.lim_salinity = SalinityGrowthFactor(ptcls_afloat.salinity, fieldset)
 
     # Compute total growth limitation as the product of the three limitation functions
     ptcls_afloat.limitation = ptcls_afloat.lim_temperature * ptcls_afloat.lim_nitrogen * ptcls_afloat.lim_salinity
