@@ -13,11 +13,13 @@ os.makedirs("Simulations", exist_ok=True)
 
 for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
     startmonth = f"2024-{month:02d}"
+    startdate = np.datetime64(f"{startmonth}-01T00:00:00")
+    enddate = startdate + np.timedelta64(31, "D")
     filename = f"Simulations/Simulation_Basin_{startmonth}.parquet"
 
     if not os.path.exists(filename):
         print(f"Running simulation for {startmonth}...")
-        fieldset = load_copernics_fieldset.create_fieldset(startmonth=startmonth)
+        fieldset = load_copernics_fieldset.create_fieldset(startdate=startdate, enddate=enddate)
 
         # Model parameters
         fieldset.z_upper = 0.0     # Upper depth extent of Sargassum raft [m]

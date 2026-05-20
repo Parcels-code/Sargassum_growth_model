@@ -4,14 +4,16 @@ import parcels
 import xarray as xr
 import numpy as np
 
-def create_fieldset(startmonth="2024-07"):
+def create_fieldset(startdate, enddate):
     # TODO make this on-the-fly access instead of downloading the file first and then loading it
 
-    startdate = np.datetime64(f"{startmonth}-01T00:00:00")
-    enddate = startdate + np.timedelta64(31, "D")
+    startdate = np.datetime64(startdate)
+    enddate = np.datetime64(enddate)
     start_datetime = np.datetime_as_string(startdate, unit="s")
     end_datetime = np.datetime_as_string(enddate, unit="s")
-    dirname = "/Users/erik/Desktop/FromElena/copernicus_marine_data/"
+    start_ymd = np.datetime_as_string(startdate, unit="D").replace("-", "")
+    end_ymd = np.datetime_as_string(enddate, unit="D").replace("-", "")
+    dirname = "copernicus_marine_data"
     os.makedirs(dirname, exist_ok=True)
 
     DATASET_IDs = [
@@ -26,7 +28,7 @@ def create_fieldset(startmonth="2024-07"):
     filenames = ["cur.nc", "so.nc", "thetao.nc", "no3.nc", "stokes.nc", "wind.nc"]
     for i in range(len(DATASET_IDs)):
 
-        filename = f"{dirname}copernicusmarine_{startmonth}_{filenames[i]}"
+        filename = os.path.join(dirname, f"copernicusmarine_{start_ymd}_{end_ymd}_{filenames[i]}")
         if not os.path.exists(filename):
             copernicusmarine.subset(
                 dataset_id=DATASET_IDs[i],
@@ -45,7 +47,7 @@ def create_fieldset(startmonth="2024-07"):
     fields = []
 
     for i in range(len(filenames)):
-        filename = f"{dirname}copernicusmarine_{startmonth}_{filenames[i]}"
+        filename = os.path.join(dirname, f"copernicusmarine_{start_ymd}_{end_ymd}_{filenames[i]}")
 
         print(f"Loading {filename}")
         ds_fields = xr.open_mfdataset(filename, combine="by_coords")
