@@ -8,7 +8,7 @@
 **.parquet**
 **SaWS_downloads**
 Input_data_test/
-**copernicus_marine_data**/*.nc
+**/**copernicus_marine_data**/*.nc
 
 # pixi environments
 .pixi/*
