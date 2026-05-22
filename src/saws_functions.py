@@ -94,7 +94,7 @@ def release_points_from_SaWS_images(date, stride=8):
 
 
 def download_images(date):
-    doy = date.timetuple().tm_yday
+    doy = f"{date.timetuple().tm_yday:03d}"
     year = date.year
 
     outdir = os.path.join("SaWS_downloads", date.strftime("%Y-%m-%d"))
