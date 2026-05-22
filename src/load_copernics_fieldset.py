@@ -16,6 +16,9 @@ def create_fieldset(startdate, enddate):
     dirname = "copernicus_marine_data"
     os.makedirs(dirname, exist_ok=True)
 
+    # Login to Copernicus Marine Service (will prompt for username and password if not already logged in)
+    copernicusmarine.login()
+
     DATASET_IDs = [
         "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
         "cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m",
