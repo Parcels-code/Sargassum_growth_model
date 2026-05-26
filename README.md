@@ -11,7 +11,7 @@ curl -fsSL https://pixi.sh/install.sh | sh
 2. Restart your terminal
 3. Clone this repository
 ```bash
-git clone https://github.com/Parcels-code/Sargassum_growth_model.git
+git clone --depth 1 https://github.com/Parcels-code/Sargassum_growth_model.git
 ```
 4. Change into the repository directory
 ```bash
