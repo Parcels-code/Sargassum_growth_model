@@ -68,7 +68,7 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
 
         kernels = [
             sargassum_kernels.Stranding,
-            sargassum_kernels.AdvectionRK2,
+            parcels.kernels.AdvectionRK2,
             sargassum_kernels.DepthIntegratedStokesDriftRK2,
             sargassum_kernels.WindageRK2,
             sargassum_kernels.SargassumBiologicalGrowthModel,

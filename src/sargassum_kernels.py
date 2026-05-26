@@ -16,16 +16,6 @@ SargassumParticle = parcels.Particle.add_variable(
         ]
     )
 
-def AdvectionRK2(particles, fieldset):  # pragma: no cover
-    """Advection of particles using second-order Runge-Kutta integration for particles that are not stranded."""
-
-    ptcls_afloat = particles[particles.stranded == 0]
-    (u1, v1) = fieldset.UV[ptcls_afloat]
-    lon1, lat1 = (ptcls_afloat.lon + u1 * 0.5 * ptcls_afloat.dt, ptcls_afloat.lat + v1 * 0.5 * ptcls_afloat.dt)
-    (u2, v2) = fieldset.UV[ptcls_afloat.time + 0.5 * ptcls_afloat.dt, ptcls_afloat.z, lat1, lon1, ptcls_afloat]
-    ptcls_afloat.dlon += u2 * ptcls_afloat.dt
-    ptcls_afloat.dlat += v2 * ptcls_afloat.dt
-
 
 def DepthIntegratedStokesDriftRK2(particles, fieldset):
     """Depth-integrated Stokes drift kernel for particles that are not stranded.
@@ -50,16 +40,14 @@ def DepthIntegratedStokesDriftRK2(particles, fieldset):
     [2] Li et al. (2017) - http://dx.doi.org/10.1016/j.ocemod.2017.03.016
     """
 
-    ptcls_afloat = particles[particles.stranded == 0]
-
     for rk in range(2):
         if rk == 0:
-            stokes_U, stokes_V = fieldset.UVStokes[ptcls_afloat]
-            T_p = np.maximum(fieldset.VTPK[ptcls_afloat], 1E-14)
+            stokes_U, stokes_V = fieldset.UVStokes[particles]
+            T_p = np.maximum(fieldset.VTPK[particles], 1E-14)
         else:
-            (lon1, lat1) = (ptcls_afloat.lon + stokes_U * 0.5 * ptcls_afloat.dt, ptcls_afloat.lat + stokes_V * 0.5 * ptcls_afloat.dt)
-            stokes_U, stokes_V = fieldset.UVStokes[ptcls_afloat.time + 0.5 * ptcls_afloat.dt, ptcls_afloat.z, lat1, lon1, ptcls_afloat]
-            T_p = np.maximum(fieldset.VTPK[ptcls_afloat.time + 0.5 * ptcls_afloat.dt, ptcls_afloat.z, lat1, lon1, ptcls_afloat], 1E-14)
+            (lon1, lat1) = (particles.lon + stokes_U * 0.5 * particles.dt, particles.lat + stokes_V * 0.5 * particles.dt)
+            stokes_U, stokes_V = fieldset.UVStokes[particles.time + 0.5 * particles.dt, particles.z, lat1, lon1, particles]
+            T_p = np.maximum(fieldset.VTPK[particles.time + 0.5 * particles.dt, particles.z, lat1, lon1, particles], 1E-14)
 
         omega_p = 2. * np.pi / T_p
         k_p = (omega_p ** 2) / 9.81
@@ -83,8 +71,8 @@ def DepthIntegratedStokesDriftRK2(particles, fieldset):
         stokes_V_integrated = (stokes_V * decay_function_lower - stokes_V * decay_function_upper) / (fieldset.z_lower - fieldset.z_upper)
 
     #Compute particle displacement based on depth-integrated Stokes velocity
-    ptcls_afloat.dlon += stokes_U_integrated * ptcls_afloat.dt
-    ptcls_afloat.dlat += stokes_V_integrated * ptcls_afloat.dt
+    particles.dlon += stokes_U_integrated * particles.dt
+    particles.dlat += stokes_V_integrated * particles.dt
 
 
 def WindageRK2(particles, fieldset):
@@ -102,22 +90,21 @@ def WindageRK2(particles, fieldset):
         - UVWind: Wind velocity field at 10m height above sea surface [m s-1]
 
     """
-    ptcls_afloat = particles[particles.stranded == 0]
 
-    ocean_U, ocean_V = fieldset.UV[ptcls_afloat]
-    wind_U, wind_V = fieldset.UVWind[ptcls_afloat]
+    ocean_U, ocean_V = fieldset.UV[particles]
+    wind_U, wind_V = fieldset.UVWind[particles]
     u = ocean_U + fieldset.wind_coeff * (wind_U - ocean_U)
     v = ocean_V + fieldset.wind_coeff * (wind_V - ocean_V)
 
-    lon1, lat1 = (ptcls_afloat.lon + u * 0.5 * ptcls_afloat.dt, ptcls_afloat.lat + v * 0.5 * ptcls_afloat.dt)
+    lon1, lat1 = (particles.lon + u * 0.5 * particles.dt, particles.lat + v * 0.5 * particles.dt)
 
-    ocean_U, ocean_V = fieldset.UV[ptcls_afloat.time + 0.5 * ptcls_afloat.dt, ptcls_afloat.z, lat1, lon1, ptcls_afloat]
-    wind_U, wind_V = fieldset.UVWind[ptcls_afloat.time + 0.5 * ptcls_afloat.dt, ptcls_afloat.z, lat1, lon1, ptcls_afloat]
+    ocean_U, ocean_V = fieldset.UV[particles.time + 0.5 * particles.dt, particles.z, lat1, lon1, particles]
+    wind_U, wind_V = fieldset.UVWind[particles.time + 0.5 * particles.dt, particles.z, lat1, lon1, particles]
     u = ocean_U + fieldset.wind_coeff * (wind_U - ocean_U)
     v = ocean_V + fieldset.wind_coeff * (wind_V - ocean_V)
 
-    ptcls_afloat.dlon += u * ptcls_afloat.dt
-    ptcls_afloat.dlat += v * ptcls_afloat.dt
+    particles.dlon += u * particles.dt
+    particles.dlat += v * particles.dt
 
 
 def Stranding(particles, fieldset):
@@ -143,11 +130,13 @@ def Stranding(particles, fieldset):
 
     u, v = fieldset.UV[particles]
 
-    particles.stranded = np.where((u == 0.0) | (v == 0.0), True, particles.stranded)
-
-    particles.dlon = np.where(particles.stranded == True, 0.0, particles.dlon)
-    particles.dlat = np.where(particles.stranded == True, 0.0, particles.dlat)
-    # particles[particles.stranded == True].state = parcels.StatusCode.Delete
+    # particles.stranded = np.where(, True, particles.stranded)
+    stranded = (u == 0.0) | (v == 0.0)
+    if np.any(stranded):
+        ptcls_stranded = particles[stranded]
+        ptcls_stranded.stranded = True
+        fieldset.output_file.write(ptcls_stranded, ptcls_stranded.time[0], fieldset=fieldset)
+        ptcls_stranded.state = parcels.StatusCode.Delete
 
 
 def TemperatureGrowthFactor(temperature, fieldset):
@@ -192,25 +181,24 @@ def SargassumBiologicalGrowthModel(particles, fieldset):
 
     """
 
-    ptcls_afloat = particles[particles.stranded == 0]
 
     # Growth limitation function for temperature, based on Jouanno et al. (2025).
-    ptcls_afloat.temperature = fieldset.thetao[ptcls_afloat]
-    ptcls_afloat.lim_temperature = TemperatureGrowthFactor(ptcls_afloat.temperature, fieldset)
+    particles.temperature = fieldset.thetao[particles]
+    particles.lim_temperature = TemperatureGrowthFactor(particles.temperature, fieldset)
 
     # Growth limitation function for nitrogen, based on Bonner et al. (2024)
-    ptcls_afloat.nitrogen = fieldset.no3[ptcls_afloat]
-    ptcls_afloat.lim_nitrogen = NitrogenGrowthFactor(ptcls_afloat.nitrogen, fieldset)
+    particles.nitrogen = fieldset.no3[particles]
+    particles.lim_nitrogen = NitrogenGrowthFactor(particles.nitrogen, fieldset)
 
     # Growth limitation function for salinity, based on Jouanno et al. (2025)
-    ptcls_afloat.salinity = fieldset.so[ptcls_afloat]
-    ptcls_afloat.lim_salinity = SalinityGrowthFactor(ptcls_afloat.salinity, fieldset)
+    particles.salinity = fieldset.so[particles]
+    particles.lim_salinity = SalinityGrowthFactor(particles.salinity, fieldset)
 
     # Compute total growth limitation as the product of the three limitation functions
-    ptcls_afloat.limitation = ptcls_afloat.lim_temperature * ptcls_afloat.lim_nitrogen * ptcls_afloat.lim_salinity
+    particles.limitation = particles.lim_temperature * particles.lim_nitrogen * particles.lim_salinity
 
     # Update biomass of floating particles with maximum specific growth rate and mortality rate converted from day-1 to s-1
-    ptcls_afloat.biomass *= 2 ** ((ptcls_afloat.limitation * fieldset.mu_max - fieldset.mort) * ptcls_afloat.dt  / (24*60*60))
+    particles.biomass *= 2 ** ((particles.limitation * fieldset.mu_max - fieldset.mort) * particles.dt  / (24*60*60))
 
 
 def DeleteOutOfBounds(particles, fieldset):

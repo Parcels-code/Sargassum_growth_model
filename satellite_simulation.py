@@ -43,10 +43,11 @@ for k_N in [0.001, 0.000129, 0.01]:
         f"Simulations/Simulation_Satellite_kN_{k_N}.parquet",
         outputdt=np.timedelta64(2, 'h'),
     )
+    fieldset.output_file = pfile  # for writing stranded particles
 
     kernels = [
         sargassum_kernels.Stranding,
-        sargassum_kernels.AdvectionRK2,
+        parcels.kernels.AdvectionRK2,
         sargassum_kernels.DepthIntegratedStokesDriftRK2,
         sargassum_kernels.WindageRK2,
         sargassum_kernels.SargassumBiologicalGrowthModel,
