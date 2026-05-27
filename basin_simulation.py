@@ -65,6 +65,7 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
             filename,
             outputdt=np.timedelta64(2, 'h'),
         )
+        fieldset.output_file = pfile  # for writing stranded particles
 
         kernels = [
             sargassum_kernels.Stranding,
