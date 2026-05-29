@@ -2,7 +2,7 @@
 
 Repository for the interactive notebook and simulations for the article **A Lagrangian framework to simulate Sargassum transport and growth** by Gianotten et al.
 
-How to install
+## How to install
 
 1. Install [Pixi](https://pixi.sh/)
 ```bash
@@ -26,3 +26,10 @@ pixi install
 pixi run jupyter lab
 ```
 7. The `interactive_sargassum_notebook.ipynb` opens automatically. Run the cells to see the simulations.
+
+## Content of this repository
+- `interactive_sargassum_notebook.ipynb`: The interactive notebook to run the Sargassum growth simulations and visualize the results.
+- `src`: A directory containing the source code for the Sargassum growth model, including the transport and growth kernels in `src/sargassum_kernels.py`.
+- `satellite_simulation.py`: The script that runs the simulation described in the manuscript with satellite-based initialisation.
+- `basin_simulation.py`: The script that runs the simulation described in the manuscript with basin-wide initialisation.
+- `Manuscript_Figures/`: A directory containing the notebooks used to create the figures for the manuscript.
