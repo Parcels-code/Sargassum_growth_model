@@ -5,15 +5,19 @@ A. Amaral-Zettler, and Erik van Sebille
 
 ## How to install
 
-1. Install [Pixi](https://pixi.sh/)
-- On Mac or Linux, run the following command in your terminal:
-```bash
-curl -fsSL https://pixi.sh/install.sh | sh
-```
-- On Windows, run the following command in PowerShell:
-```
-powershell -ExecutionPolicy Bypass -c "irm -useb https://pixi.sh/install.ps1 | iex"
-```
+1. Install [Pixi](https://pixi.sh/) (choose one option below)
+
+	**Option A: macOS or Linux**
+	Run this command in your terminal:
+	```bash
+	curl -fsSL https://pixi.sh/install.sh | sh
+	```
+
+	**Option B: Windows**
+	Run this command in PowerShell:
+	```powershell
+	powershell -ExecutionPolicy Bypass -c "irm -useb https://pixi.sh/install.ps1 | iex"
+	```
 2. Restart your terminal
 3. Clone this repository
 ```bash
