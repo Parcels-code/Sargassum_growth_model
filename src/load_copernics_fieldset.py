@@ -28,7 +28,7 @@ def create_fieldset(startdate, enddate):
         "cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H",
     ]
     variables = [["uo", "vo"], ["so"], ["thetao"], ["no3"], ["VSDX", "VSDY", "VTPK"], ["northward_wind", "eastward_wind"]]
-    filenames = ["cur.nc", "so.nc", "thetao.nc", "no3.nc", "stokes.nc", "wind.nc"]
+    filenames = ["cur.zarr", "so.zarr", "thetao.zarr", "no3.zarr", "stokes.zarr", "wind.zarr"]
     for i in range(len(DATASET_IDs)):
 
         filename = os.path.join(dirname, f"copernicusmarine_{start_ymd}_{end_ymd}_{filenames[i]}")
