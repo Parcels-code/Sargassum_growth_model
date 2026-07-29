@@ -33,10 +33,10 @@ for k_N in [0.001, 0.000129, 0.01]:
     pset = parcels.ParticleSet(
         fieldset=fieldset,
         pclass=SargassumParticle,
-        lon=coords[:, 0],
-        lat=coords[:, 1],
+        x=coords[:, 0],
+        y=coords[:, 1],
         z=np.zeros_like(coords[:, 0]),
-        time=np.datetime64('2024-07-01T00:00:00'),
+        t=np.datetime64('2024-07-01T00:00:00'),
     )
 
     pfile = parcels.ParticleFile(

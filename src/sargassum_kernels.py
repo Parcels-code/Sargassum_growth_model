@@ -45,9 +45,10 @@ def DepthIntegratedStokesDriftRK2(particles, fieldset):
             stokes_U, stokes_V = fieldset.UVStokes[particles]
             T_p = np.maximum(fieldset.VTPK[particles], 1E-14)
         else:
-            (lon1, lat1) = (particles.lon + stokes_U * 0.5 * particles.dt, particles.lat + stokes_V * 0.5 * particles.dt)
-            stokes_U, stokes_V = fieldset.UVStokes[particles.time + 0.5 * particles.dt, particles.z, lat1, lon1, particles]
-            T_p = np.maximum(fieldset.VTPK[particles.time + 0.5 * particles.dt, particles.z, lat1, lon1, particles], 1E-14)
+            x1 = particles.x + stokes_U * 0.5 * particles.dt
+            y1 = particles.y + stokes_V * 0.5 * particles.dt
+            stokes_U, stokes_V = fieldset.UVStokes[particles.t + 0.5 * particles.dt, particles.z, y1, x1, particles]
+            T_p = np.maximum(fieldset.VTPK[particles.t + 0.5 * particles.dt, particles.z, y1, x1, particles], 1E-14)
 
         omega_p = 2. * np.pi / T_p
         k_p = (omega_p ** 2) / 9.81
@@ -71,8 +72,8 @@ def DepthIntegratedStokesDriftRK2(particles, fieldset):
         stokes_V_integrated = (stokes_V * decay_function_lower - stokes_V * decay_function_upper) / (fieldset.z_lower - fieldset.z_upper)
 
     #Compute particle displacement based on depth-integrated Stokes velocity
-    particles.dlon += stokes_U_integrated * particles.dt
-    particles.dlat += stokes_V_integrated * particles.dt
+    particles.dx += stokes_U_integrated * particles.dt
+    particles.dy += stokes_V_integrated * particles.dt
 
 
 def WindageRK2(particles, fieldset):
@@ -96,15 +97,16 @@ def WindageRK2(particles, fieldset):
     u = ocean_U + fieldset.wind_coeff * (wind_U - ocean_U)
     v = ocean_V + fieldset.wind_coeff * (wind_V - ocean_V)
 
-    lon1, lat1 = (particles.lon + u * 0.5 * particles.dt, particles.lat + v * 0.5 * particles.dt)
+    x1 = particles.x + u * 0.5 * particles.dt
+    y1 = particles.y + v * 0.5 * particles.dt
 
-    ocean_U, ocean_V = fieldset.UV[particles.time + 0.5 * particles.dt, particles.z, lat1, lon1, particles]
-    wind_U, wind_V = fieldset.UVWind[particles.time + 0.5 * particles.dt, particles.z, lat1, lon1, particles]
+    ocean_U, ocean_V = fieldset.UV[particles.t + 0.5 * particles.dt, particles.z, y1, x1, particles]
+    wind_U, wind_V = fieldset.UVWind[particles.t + 0.5 * particles.dt, particles.z, y1, x1, particles]
     u = ocean_U + fieldset.wind_coeff * (wind_U - ocean_U)
     v = ocean_V + fieldset.wind_coeff * (wind_V - ocean_V)
 
-    particles.dlon += u * particles.dt
-    particles.dlat += v * particles.dt
+    particles.dx += u * particles.dt
+    particles.dy += v * particles.dt
 
 
 def Stranding(particles, fieldset):
@@ -124,7 +126,7 @@ def Stranding(particles, fieldset):
 
     Order of Operations:
     ----------
-        At the end of physical kernels. Otherwise dlon and dlat will be updated again.
+        At the end of physical kernels. Otherwise dx and dy will be updated again.
 
     """
 
@@ -135,7 +137,7 @@ def Stranding(particles, fieldset):
     if np.any(stranded):
         ptcls_stranded = particles[stranded]
         ptcls_stranded.stranded = True
-        fieldset.output_file.write(ptcls_stranded, ptcls_stranded.time[0], fieldset=fieldset)
+        fieldset.output_file.write(ptcls_stranded, ptcls_stranded.t[0], fieldset=fieldset)
         ptcls_stranded.state = parcels.StatusCode.Delete
 
 

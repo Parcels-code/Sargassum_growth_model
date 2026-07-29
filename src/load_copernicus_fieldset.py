@@ -4,8 +4,11 @@ import parcels
 import xarray as xr
 import numpy as np
 
+ModelId = str
+UsedFields = tuple[str, ...]
+Grid = list[tuple[ModelId, UsedFields]]
+
 def create_fieldset(startdate, enddate):
-    # TODO make this on-the-fly access instead of downloading the file first and then loading it
 
     startdate = np.datetime64(startdate)
     enddate = np.datetime64(enddate)
@@ -16,88 +19,117 @@ def create_fieldset(startdate, enddate):
     dirname = "copernicus_marine_data"
     os.makedirs(dirname, exist_ok=True)
 
-    # Login to Copernicus Marine Service (will prompt for username and password if not already logged in)
-    copernicusmarine.login()
 
-    DATASET_IDs = [
-        "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-        "cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m",
-        "cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m",
-        "cmems_mod_glo_bgc-nut_anfc_0.25deg_P1D-m",
-        "cmems_mod_glo_wav_anfc_0.083deg_PT3H-i",
-        "cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H",
+    DATASET_IDs_BY_GRID: list[tuple[str, Grid]] = [
+        (
+            "physics",
+            [
+                ("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m", ("uo", "vo")),
+                ("cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m", ("so",)),
+                ("cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m", ("thetao",)),
+            ],
+        ),
+        (
+            "bgc",
+            [
+                ("cmems_mod_glo_bgc-nut_anfc_0.25deg_P1D-m", ("no3",)),
+            ],
+        ),
+        (
+            "waves",
+            [
+                ("cmems_mod_glo_wav_anfc_0.083deg_PT3H-i", ("VSDX", "VSDY", "VTPK")),
+            ],
+        ),
+        (
+            "wind",
+            [
+                ("cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H", ("northward_wind", "eastward_wind")),
+            ],
+        ),
     ]
-    variables = [["uo", "vo"], ["so"], ["thetao"], ["no3"], ["VSDX", "VSDY", "VTPK"], ["northward_wind", "eastward_wind"]]
-    filenames = ["cur.zarr", "so.zarr", "thetao.zarr", "no3.zarr", "stokes.zarr", "wind.zarr"]
-    for i in range(len(DATASET_IDs)):
 
-        filename = os.path.join(dirname, f"copernicusmarine_{start_ymd}_{end_ymd}_{filenames[i]}")
-        if not os.path.exists(filename):
-            copernicusmarine.subset(
-                dataset_id=DATASET_IDs[i],
-                variables=variables[i],
-                minimum_longitude=-100,
-                maximum_longitude=16,
-                minimum_latitude=-25,
-                maximum_latitude=45,
-                start_datetime=start_datetime,
-                end_datetime=end_datetime,
-                minimum_depth=0.5,
-                maximum_depth=0.5,
-                output_filename=filename,
+    copernicus_kwargs = (
+        dict(
+            minimum_longitude=-100,
+            maximum_longitude=16,
+            minimum_latitude=-25,
+            maximum_latitude=45,
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
+            minimum_depth=0.5,
+            maximum_depth=0.5,
+        )
+    )
+
+    datasets = {}
+    fset = []
+    for name, grid_datasets in DATASET_IDs_BY_GRID:
+        datasets[name] = {}
+        datasets_list = [
+            copernicusmarine.open_dataset(id_, **copernicus_kwargs)[list(used_vars)]
+            for id_, used_vars in grid_datasets
+        ]
+        # TODO Should this processing go to copernicusmarine_to_sgrid?
+        for i in range(len(datasets_list)):
+            if "depth" not in datasets_list[i].dims:
+                datasets_list[i] = datasets_list[i].expand_dims(
+                    dim={"depth": [0]}, axis=1
+                )
+        ds = xr.merge(datasets_list)
+
+        if "uo" in ds.data_vars and "vo" in ds.data_vars:
+            ds = ds.rename({"uo": "U", "vo": "V"})
+            vector_fields = {"UV": ("U", "V")}
+        elif "northward_wind" in ds.data_vars and "eastward_wind" in ds.data_vars:
+            vector_fields = {"UVWind": ("northward_wind", "eastward_wind")}
+        elif "VSDX" in ds.data_vars and "VSDY" in ds.data_vars:
+            vector_fields = {"UVStokes": ("VSDX", "VSDY")}
+        else:
+            vector_fields = {}
+
+        for var in ds.data_vars:
+            ds[var] = ds[var].fillna(0)
+
+        datasets[name] = parcels.convert.copernicusmarine_to_sgrid(
+            fields={name: da for name, da in ds.data_vars.items()}
+        )
+
+### NOTE CODE BELOW IS BECAUSE STREAMING FROM COPERNICUSMARINE IS VERY SLOW (2 HRS instead of 2 minutes for a simulation).
+### CAN BE REMOVED WHEN STREAMING IS FAST AGAIN
+        datasets[name].to_netcdf(f"{dirname}/copernicus_{name}.nc", mode="w")
+
+    for name in datasets.keys():
+        ds = xr.open_dataset(f"{dirname}/copernicus_{name}.nc")
+        if name == "physics":
+            vector_fields = {"UV": ("U", "V")}
+        elif name == "waves":
+            vector_fields = {"UVStokes": ("VSDX", "VSDY")}
+        elif name == "wind":
+            vector_fields = {"UVWind": ("northward_wind", "eastward_wind")}
+        else:
+            vector_fields = {}
+        fset.append(
+            parcels.FieldSet.from_sgrid_conventions(
+                ds,
+                vector_fields=vector_fields
             )
+        )
+### REPLACE WITH CODE BELOW
 
-    fields = []
+        # fset.append(
+        #     parcels.FieldSet.from_sgrid_conventions(
+        #         datasets[name],
+        #         vector_fields=vector_fields
+        #     )
+        # )
+### END NOTE
 
-    for i in range(len(filenames)):
-        filename = os.path.join(dirname, f"copernicusmarine_{start_ymd}_{end_ymd}_{filenames[i]}")
+    fieldset = fset[0]
+    for f in fset[1:]:
+        fieldset += f
 
-        print(f"Loading {filename}")
-        ds_fields = xr.open_mfdataset(filename, combine="by_coords")
-
-        # TODO check how we can get good performance without loading full dataset in memory
-        ds_fields.load()  # load the dataset into memory
-
-        # TODO clean up this part, maybe make it more generic and less hardcoded
-        if "cur" in filename:
-            flds = {"U": ds_fields["uo"], "V": ds_fields["vo"]}
-        elif "so" in filename:
-            flds = {"so": ds_fields["so"]}
-        elif "thetao" in filename:
-            flds = {"thetao": ds_fields["thetao"]}
-        elif "no3" in filename:
-            flds = {"no3": ds_fields["no3"]}
-        elif "stokes" in filename:
-            ds_fields = ds_fields.expand_dims(dim={"depth": [0]})
-            flds = {"VSDX": ds_fields["VSDX"], "VSDY": ds_fields["VSDY"], "VTPK": ds_fields["VTPK"]}
-        elif "wind" in filename:
-            ds_fields = ds_fields.expand_dims(dim={"depth": [0]})
-            flds = {"northward_wind": ds_fields["northward_wind"], "eastward_wind": ds_fields["eastward_wind"]}
-
-        ds_fset = parcels.convert.copernicusmarine_to_sgrid(fields=flds)
-        fset = parcels.FieldSet.from_sgrid_conventions(ds_fset, mesh="spherical")
-
-        for fld in fset.fields.values():
-            fields.append(fld)
-    fieldset = parcels.FieldSet(fields)
-
-
-    # making vector fields of wind and stokes
-    fieldset.add_field(parcels.VectorField("UVStokes", fieldset.VSDX, fieldset.VSDY, vector_interp_method=parcels.interpolators.XLinear_Velocity))
-    fieldset.add_field(parcels.VectorField("UVWind", fieldset.northward_wind, fieldset.eastward_wind, vector_interp_method=parcels.interpolators.XLinear_Velocity))
-
-    # setting NaN values to 0 for vector fields
-    for field in ["U", "V", "VSDX", "VSDY", "northward_wind", "eastward_wind"]:
-        getattr(fieldset, field).data = getattr(fieldset, field).data.fillna(0)
-
-    # TODO check if NaN setting also needed?
-    fieldset.no3.data = fieldset.no3.data.fillna(0)
-    fieldset.thetao.data = fieldset.thetao.data.fillna(0)
-    fieldset.so.data = fieldset.so.data.fillna(0)
-    fieldset.VTPK.data = fieldset.VTPK.data.fillna(0)
-
-    #setting other interpolators to XLinearInvdistLandTracer,
-    for field in [fieldset.so, fieldset.thetao, fieldset.no3, fieldset.VTPK]:
-        field.interp_method = parcels.interpolators.XLinearInvdistLandTracer
+    fieldset.to_windowed_arrays()
+    fieldset.describe()
 
     return fieldset
