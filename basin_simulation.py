@@ -55,10 +55,10 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
         pset = parcels.ParticleSet(
             fieldset=fieldset,
             pclass = SargassumParticle,
-            lon = release_lon,
-            lat = release_lat,
+            x = release_lon,
+            y = release_lat,
             z = np.zeros_like(release_lon),
-            time = np.datetime64(f'{startmonth}-01T00:00:00'),
+            t = np.datetime64(f'{startmonth}-01T00:00:00'),
         )
 
         pfile = parcels.ParticleFile(
