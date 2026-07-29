@@ -4,7 +4,7 @@ import numpy as np
 
 import parcels
 
-import src.load_copernics_fieldset as load_copernics_fieldset  # noqa: E402
+import src.load_copernicus_fieldset as load_copernicus_fieldset  # noqa: E402
 from src.saws_functions import release_points_from_SaWS_images  # noqa: E402
 from src.sargassum_kernels import SargassumParticle  # noqa: E402
 import src.sargassum_kernels as sargassum_kernels  # noqa: E402
@@ -13,7 +13,7 @@ startdate = datetime(2024, 7, 1)
 enddate = datetime(2024, 8, 1)
 coords = release_points_from_SaWS_images(startdate, stride=8)
 
-fieldset = load_copernics_fieldset.create_fieldset(startdate=startdate, enddate=enddate)
+fieldset = load_copernicus_fieldset.create_fieldset(startdate=startdate, enddate=enddate)
 
 os.makedirs("Simulations", exist_ok=True)
 for k_N in [0.001, 0.000129, 0.01]:

@@ -5,7 +5,7 @@ from scipy.ndimage import label
 
 import parcels
 
-import src.load_copernics_fieldset as load_copernics_fieldset  # noqa: E402
+import src.load_copernicus_fieldset as load_copernicus_fieldset  # noqa: E402
 from src.sargassum_kernels import SargassumParticle  # noqa: E402
 import src.sargassum_kernels as sargassum_kernels  # noqa: E402
 
@@ -19,7 +19,7 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
 
     if not os.path.exists(filename):
         print(f"Running simulation for {startmonth}...")
-        fieldset = load_copernics_fieldset.create_fieldset(startdate=startdate, enddate=enddate)
+        fieldset = load_copernicus_fieldset.create_fieldset(startdate=startdate, enddate=enddate)
 
         # Model parameters
         fieldset.z_upper = 0.0     # Upper depth extent of Sargassum raft [m]
