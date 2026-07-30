@@ -8,6 +8,8 @@ SargassumParticle = parcels.Particle.add_variable(
             parcels.Variable('lim_temperature', dtype=np.float32, to_write=True, initial=np.nan),
             parcels.Variable('nitrogen', dtype=np.float32, to_write=True, initial=np.nan),
             parcels.Variable('lim_nitrogen', dtype=np.float32, to_write=True, initial=np.nan),
+            parcels.Variable('phosphorus', dtype=np.float32, to_write=True, initial=np.nan),
+            parcels.Variable('lim_phosphorus', dtype=np.float32, to_write=True, initial=np.nan),
             parcels.Variable('salinity', dtype=np.float32, to_write=True, initial=np.nan),
             parcels.Variable('lim_salinity', dtype=np.float32, to_write=True, initial=np.nan),
             parcels.Variable('limitation', dtype=np.float32, to_write=True, initial=np.nan),
@@ -151,6 +153,13 @@ def NitrogenGrowthFactor(nitrogen, fieldset):
     return nitrogen / ( fieldset.k_N + nitrogen )
 
 
+def PhosphorusGrowthFactor(phosphorus, fieldset):
+    if fieldset.k_P == 0.0:
+        return np.ones_like(phosphorus)
+    else:
+        return phosphorus / ( fieldset.k_P + phosphorus )
+
+
 def SalinityGrowthFactor(salinity, fieldset):
     return np.exp(-0.02 * (fieldset.S_opt - salinity)**2 )
 
@@ -169,6 +178,8 @@ def SargassumBiologicalGrowthModel(particles, fieldset):
         - lim_temperature: Temperature limitation [fraction, range 0-1]
         - nitrogen: Nitrogen at particle locations [mmol m-3]
         - lim_nitrogen: Nitrogen limitation [fraction, range 0-1]
+        - phosphorus: Phosphorus at particle locations [mmol m-3]
+        - lim_phosphorus: Phosphorus limitation [fraction, range 0-1]
         - salinity: Temperature at particle locations [psu]
         - lim_salinity: Salinity limitation [fraction, range 0-1]
 
@@ -180,6 +191,7 @@ def SargassumBiologicalGrowthModel(particles, fieldset):
         - T_max: Maximum temperature [degC]
         - S_opt: Optimal salinity [psu]
         - k_N: Nitrogen half saturation constant [mmol/m3]
+        - k_P: Phosphorus half saturation constant [mmol/m3]
 
     """
 
@@ -192,12 +204,16 @@ def SargassumBiologicalGrowthModel(particles, fieldset):
     particles.nitrogen = fieldset.no3[particles]
     particles.lim_nitrogen = NitrogenGrowthFactor(particles.nitrogen, fieldset)
 
+    # Growth limitation function for phosphorus, based on Bonner et al. (2024)
+    particles.phosphorus = fieldset.po4[particles]
+    particles.lim_phosphorus = PhosphorusGrowthFactor(particles.phosphorus, fieldset)
+
     # Growth limitation function for salinity, based on Jouanno et al. (2025)
     particles.salinity = fieldset.so[particles]
     particles.lim_salinity = SalinityGrowthFactor(particles.salinity, fieldset)
 
     # Compute total growth limitation as the product of the three limitation functions
-    particles.limitation = particles.lim_temperature * particles.lim_nitrogen * particles.lim_salinity
+    particles.limitation = particles.lim_temperature * particles.lim_nitrogen * particles.lim_phosphorus * particles.lim_salinity
 
     # Update biomass of floating particles with maximum specific growth rate and mortality rate converted from day-1 to s-1
     particles.biomass *= 2 ** ((particles.limitation * fieldset.mu_max - fieldset.mort) * particles.dt  / (24*60*60))

@@ -32,6 +32,7 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
         fieldset.T_max = 31.0      # Maximum temperature [degC]
         fieldset.S_opt = 36.0      # Optimal salinity [psu]
         fieldset.k_N = 0.001       # Nitrogen uptake half saturation [mmol/m3]
+        fieldset.k_P = 0.          # Phosphorus uptake half saturation [mmol/m3] (set to zero because unknown)
 
         # Use a connected component labeling approach to exclude the Pacific
         u_full = fieldset.uo.data.isel(time=0, depth=0)

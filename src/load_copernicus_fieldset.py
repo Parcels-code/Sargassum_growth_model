@@ -18,7 +18,7 @@ DATASET_IDs_BY_GRID = [
     (
         "bgc",
         [
-            ("cmems_mod_glo_bgc-nut_anfc_0.25deg_P1D-m", ["no3"]),
+            ("cmems_mod_glo_bgc-nut_anfc_0.25deg_P1D-m", ["no3", "po4"]),
         ],
     ),
     (
