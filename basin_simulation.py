@@ -34,7 +34,7 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
         fieldset.k_N = 0.001       # Nitrogen uptake half saturation [mmol/m3]
 
         # Use a connected component labeling approach to exclude the Pacific
-        u_full = fieldset.U.data.isel(time=0, depth=0)
+        u_full = fieldset.uo.data.isel(time=0, depth=0)
         ocean = np.isfinite(u_full.values) & (u_full.values != 0)
         labeled, _ = label(ocean)
         pacific_label = labeled[0, 0] # u_full[0, 0] is in the Pacific
@@ -44,11 +44,11 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
         release_spacing = 6  # spacing in the original grid (1/12 deg)
         u_coarse = u_masked.isel(lon=slice(None, None, release_spacing), lat=slice(None, None, release_spacing))
         pts = u_coarse.where(u_coarse != 0).stack(points=("lat", "lon")).dropna("points")
-        release_lon = fieldset.U.grid.lon[pts.lon.values]
-        release_lat = fieldset.U.grid.lat[pts.lat.values]
+        release_lon = fieldset.uo.grid.lon[pts.lon.values]
+        release_lat = fieldset.uo.grid.lat[pts.lat.values]
 
         # Remove northernmost row, as these can't be advected
-        keep = ~np.isclose(release_lat, fieldset.U.grid.lat[-1], atol=1e-10)
+        keep = ~np.isclose(release_lat, fieldset.uo.grid.lat[-1], atol=1e-10)
         release_lat = release_lat[keep]
         release_lon = release_lon[keep]
 

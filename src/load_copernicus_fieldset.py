@@ -4,37 +4,33 @@ import parcels
 import xarray as xr
 import numpy as np
 
-ModelId = str
-UsedFields = tuple[str, ...]
-Grid = list[tuple[ModelId, UsedFields]]
-
 DIRNAME = "copernicus_marine_data"
 
-DATASET_IDs_BY_GRID: list[tuple[str, Grid]] = [
+DATASET_IDs_BY_GRID = [
     (
         "physics",
         [
-            ("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m", ("uo", "vo")),
-            ("cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m", ("so",)),
-            ("cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m", ("thetao",)),
+            ("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m", ["uo", "vo"]),
+            ("cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m", ["so"]),
+            ("cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m", ["thetao"]),
         ],
     ),
     (
         "bgc",
         [
-            ("cmems_mod_glo_bgc-nut_anfc_0.25deg_P1D-m", ("no3",)),
+            ("cmems_mod_glo_bgc-nut_anfc_0.25deg_P1D-m", ["no3"]),
         ],
     ),
     (
         "waves",
         [
-            ("cmems_mod_glo_wav_anfc_0.083deg_PT3H-i", ("VSDX", "VSDY", "VTPK")),
+            ("cmems_mod_glo_wav_anfc_0.083deg_PT3H-i", ["VSDX", "VSDY", "VTPK"]),
         ],
     ),
     (
         "wind",
         [
-            ("cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H", ("northward_wind", "eastward_wind")),
+            ("cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H", ["northward_wind", "eastward_wind"]),
         ],
     ),
 ]
@@ -42,38 +38,26 @@ DATASET_IDs_BY_GRID: list[tuple[str, Grid]] = [
 
 def create_fieldset(startdate, enddate):
 
-    copernicus_kwargs = (
-        dict(
-            minimum_longitude=-100,
-            maximum_longitude=16,
-            minimum_latitude=-25,
-            maximum_latitude=45,
-            start_datetime=np.datetime_as_string(startdate, unit="s"),
-            end_datetime=np.datetime_as_string(enddate, unit="s"),
-            minimum_depth=0.5,
-            maximum_depth=0.5,
-        )
-    )
-
     #%% Downloading the datasets from CopernicusMarine
     datasets = {}
     for name, grid_datasets in DATASET_IDs_BY_GRID:
         datasets[name] = {}
         datasets_list = [
-            copernicusmarine.open_dataset(id_, **copernicus_kwargs)[list(used_vars)]
-            for id_, used_vars in grid_datasets
+            copernicusmarine.open_dataset(
+                dataset_id=dataset_id,
+                variables=used_vars,
+                minimum_longitude=-100,
+                maximum_longitude=16,
+                minimum_latitude=-25,
+                maximum_latitude=45,
+                start_datetime=np.datetime_as_string(startdate, unit="s"),
+                end_datetime=np.datetime_as_string(enddate, unit="s"),
+                minimum_depth=0.5,
+                maximum_depth=0.5,
+            )
+            for dataset_id, used_vars in grid_datasets
         ]
         ds = xr.merge(datasets_list)
-
-        if "uo" in ds.data_vars and "vo" in ds.data_vars:
-            ds = ds.rename({"uo": "U", "vo": "V"})
-            vector_fields = {"UV": ("U", "V")}
-        elif "northward_wind" in ds.data_vars and "eastward_wind" in ds.data_vars:
-            vector_fields = {"UVWind": ("northward_wind", "eastward_wind")}
-        elif "VSDX" in ds.data_vars and "VSDY" in ds.data_vars:
-            vector_fields = {"UVStokes": ("VSDX", "VSDY")}
-        else:
-            vector_fields = {}
 
         for var in ds.data_vars:
             ds[var] = ds[var].fillna(0)
@@ -97,7 +81,7 @@ def create_fieldset(startdate, enddate):
         filename = f"{DIRNAME}/copernicus_{name}.nc"
         ds = xr.open_dataset(filename, engine="netcdf4", chunks="auto")
         if name == "physics":
-            vector_fields = {"UV": ("U", "V")}
+            vector_fields = {"UV": ("uo", "vo")}
         elif name == "waves":
             vector_fields = {"UVStokes": ("VSDX", "VSDY")}
         elif name == "wind":
@@ -112,6 +96,14 @@ def create_fieldset(startdate, enddate):
         )
 ### REPLACE WITH CODE BELOW
 
+        # if "uo" in ds.data_vars and "vo" in ds.data_vars:
+        #     vector_fields = {"UV": ("uo", "vo")}
+        # elif "northward_wind" in ds.data_vars and "eastward_wind" in ds.data_vars:
+        #     vector_fields = {"UVWind": ("northward_wind", "eastward_wind")}
+        # elif "VSDX" in ds.data_vars and "VSDY" in ds.data_vars:
+        #     vector_fields = {"UVStokes": ("VSDX", "VSDY")}
+        # else:
+        #     vector_fields = {}
         # fset = []
         # fset.append(
         #     parcels.FieldSet.from_sgrid_conventions(
