@@ -44,8 +44,8 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
         release_spacing = 6  # spacing in the original grid (1/12 deg)
         u_coarse = u_masked.isel(lon=slice(None, None, release_spacing), lat=slice(None, None, release_spacing))
         pts = u_coarse.where(u_coarse != 0).stack(points=("lat", "lon")).dropna("points")
-        release_lon = pts.lon.values
-        release_lat = pts.lat.values
+        release_lon = fieldset.U.grid.lon[pts.lon.values]
+        release_lat = fieldset.U.grid.lat[pts.lat.values]
 
         # Remove northernmost row, as these can't be advected
         keep = ~np.isclose(release_lat, fieldset.U.grid.lat[-1], atol=1e-10)
