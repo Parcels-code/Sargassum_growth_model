@@ -8,46 +8,39 @@ ModelId = str
 UsedFields = tuple[str, ...]
 Grid = list[tuple[ModelId, UsedFields]]
 
+DIRNAME = "copernicus_marine_data"
+
+DATASET_IDs_BY_GRID: list[tuple[str, Grid]] = [
+    (
+        "physics",
+        [
+            ("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m", ("uo", "vo")),
+            ("cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m", ("so",)),
+            ("cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m", ("thetao",)),
+        ],
+    ),
+    (
+        "bgc",
+        [
+            ("cmems_mod_glo_bgc-nut_anfc_0.25deg_P1D-m", ("no3",)),
+        ],
+    ),
+    (
+        "waves",
+        [
+            ("cmems_mod_glo_wav_anfc_0.083deg_PT3H-i", ("VSDX", "VSDY", "VTPK")),
+        ],
+    ),
+    (
+        "wind",
+        [
+            ("cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H", ("northward_wind", "eastward_wind")),
+        ],
+    ),
+]
+
+
 def create_fieldset(startdate, enddate):
-
-    startdate = np.datetime64(startdate)
-    enddate = np.datetime64(enddate)
-    start_datetime = np.datetime_as_string(startdate, unit="s")
-    end_datetime = np.datetime_as_string(enddate, unit="s")
-    start_ymd = np.datetime_as_string(startdate, unit="D").replace("-", "")
-    end_ymd = np.datetime_as_string(enddate, unit="D").replace("-", "")
-    dirname = "copernicus_marine_data"
-    os.makedirs(dirname, exist_ok=True)
-
-
-    DATASET_IDs_BY_GRID: list[tuple[str, Grid]] = [
-        (
-            "physics",
-            [
-                ("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m", ("uo", "vo")),
-                ("cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m", ("so",)),
-                ("cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m", ("thetao",)),
-            ],
-        ),
-        (
-            "bgc",
-            [
-                ("cmems_mod_glo_bgc-nut_anfc_0.25deg_P1D-m", ("no3",)),
-            ],
-        ),
-        (
-            "waves",
-            [
-                ("cmems_mod_glo_wav_anfc_0.083deg_PT3H-i", ("VSDX", "VSDY", "VTPK")),
-            ],
-        ),
-        (
-            "wind",
-            [
-                ("cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H", ("northward_wind", "eastward_wind")),
-            ],
-        ),
-    ]
 
     copernicus_kwargs = (
         dict(
@@ -55,27 +48,21 @@ def create_fieldset(startdate, enddate):
             maximum_longitude=16,
             minimum_latitude=-25,
             maximum_latitude=45,
-            start_datetime=start_datetime,
-            end_datetime=end_datetime,
+            start_datetime=np.datetime_as_string(startdate, unit="s"),
+            end_datetime=np.datetime_as_string(enddate, unit="s"),
             minimum_depth=0.5,
             maximum_depth=0.5,
         )
     )
 
+    #%% Downloading the datasets from CopernicusMarine
     datasets = {}
-    fset = []
     for name, grid_datasets in DATASET_IDs_BY_GRID:
         datasets[name] = {}
         datasets_list = [
             copernicusmarine.open_dataset(id_, **copernicus_kwargs)[list(used_vars)]
             for id_, used_vars in grid_datasets
         ]
-        # TODO Should this processing go to copernicusmarine_to_sgrid?
-        for i in range(len(datasets_list)):
-            if "depth" not in datasets_list[i].dims:
-                datasets_list[i] = datasets_list[i].expand_dims(
-                    dim={"depth": [0]}, axis=1
-                )
         ds = xr.merge(datasets_list)
 
         if "uo" in ds.data_vars and "vo" in ds.data_vars:
@@ -95,12 +82,20 @@ def create_fieldset(startdate, enddate):
             fields={name: da for name, da in ds.data_vars.items()}
         )
 
-### NOTE CODE BELOW IS BECAUSE STREAMING FROM COPERNICUSMARINE IS VERY SLOW (2 HRS instead of 2 minutes for a simulation).
-### CAN BE REMOVED WHEN STREAMING IS FAST AGAIN
-        datasets[name].to_netcdf(f"{dirname}/copernicus_{name}.nc", mode="w")
+# ### NOTE CODE BELOW IS BECAUSE STREAMING FROM COPERNICUSMARINE IS VERY SLOW (2 HRS instead of 2 minutes for a simulation).
+# ### CAN BE REMOVED WHEN STREAMING IS FAST AGAIN
+#         os.makedirs(DIRNAME, exist_ok=True)
+#%% Saving the datasets to local files for later use
 
-    for name in datasets.keys():
-        ds = xr.open_dataset(f"{dirname}/copernicus_{name}.nc")
+        filename = f"{DIRNAME}/copernicus_{name}.nc"
+        os.remove(filename) if os.path.exists(filename) else None
+        datasets[name].to_netcdf(f"{DIRNAME}/copernicus_{name}.nc", mode="w")
+
+#%% Loading the datasets from the local files instead of streaming from CopernicusMarine
+    fset = []
+    for name, _ in DATASET_IDs_BY_GRID:
+        filename = f"{DIRNAME}/copernicus_{name}.nc"
+        ds = xr.open_dataset(filename, engine="netcdf4", chunks="auto")
         if name == "physics":
             vector_fields = {"UV": ("U", "V")}
         elif name == "waves":
@@ -117,6 +112,7 @@ def create_fieldset(startdate, enddate):
         )
 ### REPLACE WITH CODE BELOW
 
+        # fset = []
         # fset.append(
         #     parcels.FieldSet.from_sgrid_conventions(
         #         datasets[name],
@@ -125,6 +121,7 @@ def create_fieldset(startdate, enddate):
         # )
 ### END NOTE
 
+#%% Combining the fieldsets into a single fieldset
     fieldset = fset[0]
     for f in fset[1:]:
         fieldset += f
