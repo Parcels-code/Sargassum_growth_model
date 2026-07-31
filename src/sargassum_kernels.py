@@ -173,11 +173,11 @@ def SargassumBiologicalGrowthModel(particles, fieldset):
     particle :
         - temperature: Temperature at particle locations [degC]
         - lim_temperature: Temperature limitation [fraction, range 0-1]
-        - nitrogen: Nitrogen at particle locations [mmol m-3]
+        - nitrogen: Nitrogen at particle locations [mmol/m3]
         - lim_nitrogen: Nitrogen limitation [fraction, range 0-1]
-        - phosphorus: Phosphorus at particle locations [mmol m-3]
+        - phosphorus: Phosphorus at particle locations [mmol/m3]
         - lim_phosphorus: Phosphorus limitation [fraction, range 0-1]
-        - salinity: Temperature at particle locations [psu]
+        - salinity: Salinity at particle locations [psu]
         - lim_salinity: Salinity limitation [fraction, range 0-1]
 
     fieldset :
