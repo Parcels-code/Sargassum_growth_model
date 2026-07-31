@@ -36,49 +36,56 @@ DATASET_IDs_BY_GRID = [
 ]
 
 
+def _get_filename(dataset_id, startdate, enddate):
+    startdoy = f"{startdate.astype('datetime64[D]').astype(object).timetuple().tm_yday:03d}"
+    enddoy = f"{enddate.astype('datetime64[D]').astype(object).timetuple().tm_yday:03d}"
+    return f"{DIRNAME}/copernicus_{dataset_id}_{startdoy}_{enddoy}.nc"
+
+
 def create_fieldset(startdate, enddate):
 
     #%% Downloading the datasets from CopernicusMarine
     datasets = {}
     for name, grid_datasets in DATASET_IDs_BY_GRID:
-        datasets[name] = {}
-        datasets_list = [
-            copernicusmarine.open_dataset(
-                dataset_id=dataset_id,
-                variables=used_vars,
-                minimum_longitude=-100,
-                maximum_longitude=16,
-                minimum_latitude=-25,
-                maximum_latitude=45,
-                start_datetime=np.datetime_as_string(startdate, unit="s"),
-                end_datetime=np.datetime_as_string(enddate, unit="s"),
-                minimum_depth=0.5,
-                maximum_depth=0.5,
+
+        filename = _get_filename(name, startdate, enddate)
+        if not os.path.exists(filename):
+
+            datasets[name] = {}
+            datasets_list = [
+                copernicusmarine.open_dataset(
+                    dataset_id=dataset_id,
+                    variables=used_vars,
+                    minimum_longitude=-100,
+                    maximum_longitude=16,
+                    minimum_latitude=-25,
+                    maximum_latitude=45,
+                    start_datetime=np.datetime_as_string(startdate, unit="s"),
+                    end_datetime=np.datetime_as_string(enddate, unit="s"),
+                    minimum_depth=0.5,
+                    maximum_depth=0.5,
+                )
+                for dataset_id, used_vars in grid_datasets
+            ]
+            ds = xr.merge(datasets_list)
+
+            for var in ds.data_vars:
+                ds[var] = ds[var].fillna(0)
+
+            datasets[name] = parcels.convert.copernicusmarine_to_sgrid(
+                fields={name: da for name, da in ds.data_vars.items()}
             )
-            for dataset_id, used_vars in grid_datasets
-        ]
-        ds = xr.merge(datasets_list)
-
-        for var in ds.data_vars:
-            ds[var] = ds[var].fillna(0)
-
-        datasets[name] = parcels.convert.copernicusmarine_to_sgrid(
-            fields={name: da for name, da in ds.data_vars.items()}
-        )
 
 # ### NOTE CODE BELOW IS BECAUSE STREAMING FROM COPERNICUSMARINE IS VERY SLOW (2 HRS instead of 2 minutes for a simulation).
 # ### CAN BE REMOVED WHEN STREAMING IS FAST AGAIN
-#         os.makedirs(DIRNAME, exist_ok=True)
 #%% Saving the datasets to local files for later use
-
-        filename = f"{DIRNAME}/copernicus_{name}.nc"
-        os.remove(filename) if os.path.exists(filename) else None
-        datasets[name].to_netcdf(f"{DIRNAME}/copernicus_{name}.nc", mode="w")
+            os.makedirs(DIRNAME, exist_ok=True)
+            datasets[name].to_netcdf(filename)
 
 #%% Loading the datasets from the local files instead of streaming from CopernicusMarine
     fset = []
     for name, _ in DATASET_IDs_BY_GRID:
-        filename = f"{DIRNAME}/copernicus_{name}.nc"
+        filename = _get_filename(name, startdate, enddate)
         ds = xr.open_dataset(filename, engine="netcdf4", chunks="auto")
         if name == "physics":
             vector_fields = {"UV": ("uo", "vo")}
