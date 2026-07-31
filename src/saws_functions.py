@@ -18,6 +18,9 @@ def release_points_from_SaWS_images(date, stride=8):
     images = download_images(date)
     all_lons = []
     all_lats = []
+    brightness_lons = []
+    brightness_lats = []
+    brightness_values = []
 
     for image in images:
         #Loading the image as an RGB array
@@ -84,13 +87,20 @@ def release_points_from_SaWS_images(date, stride=8):
         all_lons.append(sarg_lon.values[no_nan_mask].ravel())
         all_lats.append(sarg_lat.values[no_nan_mask].ravel())
 
+        valid_brightness = ~np.isnan(brightness)
+        brightness_lons.append(lon.ravel()[valid_brightness.ravel()])
+        brightness_lats.append(lat.ravel()[valid_brightness.ravel()])
+        brightness_values.append(brightness.ravel()[valid_brightness.ravel()])
+
     coords = np.column_stack((np.concatenate(all_lons), np.concatenate(all_lats)))
     lon_bins = np.rint(coords[:, 0] / (stride*pixel_size_lon)).astype(np.int64)
     lat_bins = np.rint(coords[:, 1] / (stride*pixel_size_lat)).astype(np.int64)
     grid_bins = np.column_stack((lon_bins, lat_bins))
     _, unique_idx = np.unique(grid_bins, axis=0, return_index=True)
     unique_coords = coords[np.sort(unique_idx)]
-    return unique_coords
+
+    brightness = np.column_stack((np.concatenate(brightness_lons), np.concatenate(brightness_lats), np.concatenate(brightness_values)))
+    return unique_coords, brightness
 
 
 def download_images(date):
