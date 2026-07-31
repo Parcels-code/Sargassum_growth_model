@@ -10,6 +10,8 @@
 Input_data_test/
 **/**copernicus_marine_data**/*.nc
 **/**copernicus_marine_data**/*.zarr
+settings.json
+copernicus_marine_data
 
 # pixi environments
 .pixi/*
