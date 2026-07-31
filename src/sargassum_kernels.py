@@ -154,10 +154,7 @@ def NitrogenGrowthFactor(nitrogen, fieldset):
 
 
 def PhosphorusGrowthFactor(phosphorus, fieldset):
-    if fieldset.k_P == 0.0:
-        return np.ones_like(phosphorus)
-    else:
-        return phosphorus / ( fieldset.k_P + phosphorus )
+    return phosphorus / ( fieldset.k_P + phosphorus )
 
 
 def SalinityGrowthFactor(salinity, fieldset):
