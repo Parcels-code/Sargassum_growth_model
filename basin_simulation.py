@@ -32,7 +32,7 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
         fieldset.T_max = 31.0      # Maximum temperature [degC]
         fieldset.S_opt = 36.0      # Optimal salinity [psu]
         fieldset.k_N = 0.001       # Nitrogen uptake half saturation [mmol/m3]
-        fieldset.k_P = 0.          # Phosphorus uptake half saturation [mmol/m3] (set to zero because unknown)
+        fieldset.k_P = 0.0008      # Phosphorus uptake half saturation [mmol/m3]
 
         # Use a connected component labeling approach to exclude the Pacific
         u_full = fieldset.uo.data.isel(time=0, depth=0)
@@ -44,11 +44,9 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
         # Coarsen the grid and select release points
         release_spacing = 6  # spacing in the original grid (1/12 deg)
         u_coarse = u_masked.isel(lon=slice(None, None, release_spacing), lat=slice(None, None, release_spacing))
-        lon_coarse = fieldset.uo.grid.lon[::release_spacing]
-        lat_coarse = fieldset.uo.grid.lat[::release_spacing]
         pts = u_coarse.where(u_coarse != 0).stack(points=("lat", "lon")).dropna("points")
-        release_lon = lon_coarse[pts.lon.values]
-        release_lat = lat_coarse[pts.lat.values]
+        release_lon = pts.lon.values
+        release_lat = pts.lat.values
 
         # Remove northernmost row, as these can't be advected
         keep = ~np.isclose(release_lat, fieldset.uo.grid.lat[-1], atol=1e-10)
@@ -63,6 +61,14 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
             z = np.zeros_like(release_lon),
             t = np.datetime64(f'{startmonth}-01T00:00:00'),
         )
+
+        # Do an initial sampling of the Biological Growth Model
+        # to initialize the particle variables
+        sargassum_kernels.SargassumBiologicalGrowthModel(pset, fieldset)
+
+        # Now convert to windowed arrays for faster execution
+        fieldset.to_windowed_arrays()
+        fieldset.describe()
 
         pfile = parcels.ParticleFile(
             filename,

@@ -125,7 +125,4 @@ def create_fieldset(startdate, enddate):
     for f in fset[1:]:
         fieldset += f
 
-    fieldset.to_windowed_arrays()
-    fieldset.describe()
-
     return fieldset

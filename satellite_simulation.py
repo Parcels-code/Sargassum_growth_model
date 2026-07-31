@@ -41,7 +41,13 @@ for k_N in [0.001, 0.000129, 0.01]:
             t=np.datetime64('2024-07-01T00:00:00'),
         )
 
-        # TODO init sampling
+        # Do an initial sampling of the Biological Growth Model
+        # to initialize the particle variables
+        sargassum_kernels.SargassumBiologicalGrowthModel(pset, fieldset)
+
+        # Now convert to windowed arrays for faster execution
+        fieldset.to_windowed_arrays()
+        fieldset.describe()
 
         pfile = parcels.ParticleFile(
             f"Simulations/Simulation_Satellite_kN_{k_N}_kP_{k_P}.parquet",
