@@ -20,7 +20,6 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
     if os.path.exists(filename):
         continue
 
-    print(f"Running simulation for {startmonth}...")
     fieldset = load_copernicus_fieldset.create_fieldset(startdate=startdate, enddate=enddate)
 
     # Model parameters

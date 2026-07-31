@@ -9,12 +9,6 @@ from src.saws_functions import release_points_from_SaWS_images  # noqa: E402
 from src.sargassum_kernels import SargassumParticle  # noqa: E402
 import src.sargassum_kernels as sargassum_kernels  # noqa: E402
 
-startdate = datetime(2024, 7, 1)
-enddate = datetime(2024, 8, 1)
-coords = release_points_from_SaWS_images(startdate, stride=8)
-
-fieldset = load_copernicus_fieldset.create_fieldset(startdate=np.datetime64(startdate), enddate=np.datetime64(enddate))
-
 os.makedirs("Simulations", exist_ok=True)
 for k_N, k_P in [(0.001, 0.0008), (0.000129, 0.0008), (0.01, 0.0008), (0.001, 0.8), (0.001, 0.008), (0.001, 0.0008)]:
     for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
@@ -31,6 +25,8 @@ for k_N, k_P in [(0.001, 0.0008), (0.000129, 0.0008), (0.01, 0.0008), (0.001, 0.
             # Only run all parameters for July
             continue
 
+        fieldset = load_copernicus_fieldset.create_fieldset(startdate=startdate, enddate=enddate)
+
         # Model parameters
         fieldset.z_upper = 0.0     # Upper depth extent of Sargassum raft [m]
         fieldset.z_lower = 1.0     # Lower depth extent of Sargassum raft [m]
@@ -43,6 +39,8 @@ for k_N, k_P in [(0.001, 0.0008), (0.000129, 0.0008), (0.01, 0.0008), (0.001, 0.
         fieldset.S_opt = 36.0      # Optimal salinity [psu]
         fieldset.k_N = k_N         # Nitrogen uptake half saturation [mmol/m3]
         fieldset.k_P = k_P         # Phosphorus uptake half saturation [mmol/m3]
+
+        coords = release_points_from_SaWS_images(startdate, stride=8)
 
         pset = parcels.ParticleSet(
             fieldset=fieldset,
