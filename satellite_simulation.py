@@ -40,7 +40,7 @@ for k_N, k_P in [(0.001, 0.0008), (0.000129, 0.0008), (0.01, 0.0008), (0.001, 0.
         fieldset.k_N = k_N         # Nitrogen uptake half saturation [mmol/m3]
         fieldset.k_P = k_P         # Phosphorus uptake half saturation [mmol/m3]
 
-        coords, _ = release_points_from_SaWS_images(startdate, stride=8)
+        coords, _ = release_points_from_SaWS_images(startdate.astype(datetime), stride=8)
 
         pset = parcels.ParticleSet(
             fieldset=fieldset,

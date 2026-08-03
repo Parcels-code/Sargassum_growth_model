@@ -87,10 +87,10 @@ def release_points_from_SaWS_images(date, stride=8):
         all_lons.append(sarg_lon.values[no_nan_mask].ravel())
         all_lats.append(sarg_lat.values[no_nan_mask].ravel())
 
-        valid_brightness = ~np.isnan(brightness)
+        valid_brightness = ~np.isnan(brightness[::stride, ::stride])
         brightness_lons.append(lon.ravel()[valid_brightness.ravel()])
         brightness_lats.append(lat.ravel()[valid_brightness.ravel()])
-        brightness_values.append(brightness.ravel()[valid_brightness.ravel()])
+        brightness_values.append(brightness[::stride, ::stride].ravel()[valid_brightness.ravel()])
 
     coords = np.column_stack((np.concatenate(all_lons), np.concatenate(all_lats)))
     lon_bins = np.rint(coords[:, 0] / (stride*pixel_size_lon)).astype(np.int64)
