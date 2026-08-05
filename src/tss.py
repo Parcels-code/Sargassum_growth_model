@@ -22,8 +22,8 @@ def tss(obs, pred):
     return sensitivity + specificity - 1
 
 
-def compute_tss(x_obs, y_obs, x_pred, y_pred, brightness, DX):
-    """Compute TSS for a given set of observed and predicted points."""
+def compute_presence_grids(x_obs, y_obs, x_pred, y_pred, brightness, DX):
+    """Compute presence grid for a given set of observed and predicted points."""
     # 1) Define grid edges
     x_edges = np.arange(np.nanmin(x_obs), np.nanmax(x_obs) + DX, DX)
     y_edges = np.arange(np.nanmin(y_obs), np.nanmax(y_obs) + DX, DX)
@@ -37,5 +37,16 @@ def compute_tss(x_obs, y_obs, x_pred, y_pred, brightness, DX):
     obs_grid = make_presence_grid(x_obs, y_obs, x_edges, y_edges, valid_mask)
     pred_grid = make_presence_grid(x_pred, y_pred, x_edges, y_edges, valid_mask)
 
-    # 4) Compute TSS (Allouche et al. 2006)
+    # 4) Compute agreement grid
+    agreement = (pred_grid.astype(int) + 2 * obs_grid.astype(int)).astype(float)
+    agreement[~valid_mask] = np.nan
+
+    return obs_grid, pred_grid, agreement, x_edges, y_edges
+
+
+def compute_tss(x_obs, y_obs, x_pred, y_pred, brightness, DX):
+    """Compute TSS (Allouche et al. 2006) for a given set of observed and predicted points."""
+
+    obs_grid, pred_grid, _, _, _ = compute_presence_grids(x_obs, y_obs, x_pred, y_pred, brightness, DX)
+
     return tss(obs_grid, pred_grid)
