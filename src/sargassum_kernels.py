@@ -20,7 +20,7 @@ SargassumParticle = parcels.Particle.add_variable(
 
 
 def DepthIntegratedStokesDriftRK2(particles, fieldset):
-    """Depth-integrated Stokes drift kernel for particles that are not stranded.
+    """Depth-integrated Stokes drift kernel using an RK2 scheme.
 
     Description
     ----------
@@ -78,8 +78,22 @@ def DepthIntegratedStokesDriftRK2(particles, fieldset):
     particles.dy += stokes_V_integrated * particles.dt
 
 
+def SurfaceStokesDriftRK2(particles, fieldset):
+    """Surface Stokes drift kernel using an RK2 scheme"""
+
+    stokes_U, stokes_V = fieldset.UVStokes[particles]
+    x1 = particles.x + stokes_U * 0.5 * particles.dt
+    y1 = particles.y + stokes_V * 0.5 * particles.dt
+
+    stokes_U, stokes_V = fieldset.UVStokes[particles.t + 0.5 * particles.dt, particles.z, y1, x1, particles]
+
+    #Compute particle displacement based on depth-integrated Stokes velocity
+    particles.dx += stokes_U * particles.dt
+    particles.dy += stokes_V * particles.dt
+
+
 def WindageRK2(particles, fieldset):
-    """Leeway windage kernel using an RK2 scheme for particles that are not stranded.
+    """Leeway windage kernel using an RK2 scheme.
 
     Description
     ----------

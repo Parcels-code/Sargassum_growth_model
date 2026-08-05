@@ -19,7 +19,7 @@ default_dict = {
     "with_Stokes": 1,
     "wind_coeff": 0.01,}
 
-for with_Stokes in [1, 0]:
+for with_Stokes in [1, 0, "surface"]:
     for wind_coeff in [0.01, 0.0, 0.02, 0.03]:
         new_dict = default_dict.copy()
         new_dict["with_Stokes"] = with_Stokes
@@ -109,6 +109,10 @@ for exp in all_exps:
 
     if exp["with_Stokes"] == 0:
         kernels.remove(sargassum_kernels.DepthIntegratedStokesDriftRK2)
+
+    if exp["with_Stokes"] == "surface":
+        kernels.remove(sargassum_kernels.DepthIntegratedStokesDriftRK2)
+        kernels.insert(2, sargassum_kernels.SurfaceStokesDriftRK2)
 
     pset.execute(
         kernels=kernels,
