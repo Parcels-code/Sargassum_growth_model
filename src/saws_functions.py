@@ -87,6 +87,7 @@ def release_points_from_SaWS_images(date, stride=8):
         all_lons.append(sarg_lon.values[no_nan_mask].ravel())
         all_lats.append(sarg_lat.values[no_nan_mask].ravel())
 
+        brightness[land_mask] = np.nan
         valid_brightness = ~np.isnan(brightness[::stride, ::stride])
         brightness_lons.append(lon.ravel()[valid_brightness.ravel()])
         brightness_lats.append(lat.ravel()[valid_brightness.ravel()])
