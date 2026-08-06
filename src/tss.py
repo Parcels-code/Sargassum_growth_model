@@ -25,8 +25,8 @@ def tss(obs, pred):
 def compute_presence_grids(x_obs, y_obs, x_pred, y_pred, brightness, DX):
     """Compute presence grid for a given set of observed and predicted points."""
     # 1) Define grid edges
-    x_edges = np.arange(np.nanmin(x_obs), np.nanmax(x_obs) + DX, DX)
-    y_edges = np.arange(np.nanmin(y_obs), np.nanmax(y_obs) + DX, DX)
+    x_edges = np.arange(np.nanmin(brightness[:, 0]), np.nanmax(brightness[:, 0]) + DX, DX)
+    y_edges = np.arange(np.nanmin(brightness[:, 1]), np.nanmax(brightness[:, 1]) + DX, DX)
 
     # 2) Create a valid mask based on brightness
     valid_points = brightness[:, 2] > 1
