@@ -25,7 +25,7 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
     # Model parameters
     fieldset.z_upper = 0.0     # Upper depth extent of Sargassum raft [m]
     fieldset.z_lower = 1.0     # Lower depth extent of Sargassum raft [m]
-    fieldset.wind_coeff = 0.01 # Windage coefficient [fraction]
+    fieldset.wind_coeff = 0.0  # Windage coefficient [fraction]
     fieldset.mu_max = 0.095    # Maximum growth rate [doublings/day]
     fieldset.mort = 0.025      # Mortality rate [loss/day]
     fieldset.T_min = 20.0      # Minimum temperature [degC]
@@ -67,8 +67,9 @@ for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
     # to initialize the particle variables
     sargassum_kernels.SargassumBiologicalGrowthModel(pset, fieldset)
 
-    # Now convert to windowed arrays for faster execution
-    fieldset.to_windowed_arrays()
+    # Now load datasets into memory for faster execution
+    for model in fieldset.models:
+        model.data.load()
     fieldset.describe()
 
     pfile = parcels.ParticleFile(
