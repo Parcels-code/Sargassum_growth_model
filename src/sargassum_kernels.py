@@ -107,6 +107,8 @@ def WindageRK2(particles, fieldset):
         - UVWind: Wind velocity field at 10m height above sea surface [m s-1]
 
     """
+    if fieldset.wind_coeff == 0.0:
+        return
 
     ocean_U, ocean_V = fieldset.UV[particles]
     wind_U, wind_V = fieldset.UVWind[particles]
@@ -153,7 +155,7 @@ def Stranding(particles, fieldset):
     if np.any(stranded):
         ptcls_stranded = particles[stranded]
         ptcls_stranded.stranded = True
-        fieldset.output_file.write(ptcls_stranded, ptcls_stranded.t[0], fieldset=fieldset)
+        fieldset.output_file.write(ptcls_stranded, ptcls_stranded.t)
         ptcls_stranded.state = parcels.StatusCode.Delete
 
 
