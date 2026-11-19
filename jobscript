@@ -1,0 +1,10 @@
+#!/bin/bash -l
+#
+#SBATCH -J sargassum_sat
+#SBATCH -t 24:00:00
+#SBATCH -n 1
+#SBATCH -o log.%x.%j.o
+#SBATCH -e log.%x.%j.e
+
+cd ~/Sargassum_growth_model
+pixi run python -u satellite_simulation.py
