@@ -13,7 +13,7 @@ jupyter = "jupyter"
 JUPYTER_CONFIG_DIR = ".jupyter"
 
 [dependencies]
-parcels = ">=4.0.0"
+parcels = ">=4.0.3"
 ipykernel = ">=7.3.0,<8"
 cmocean = ">=4.0.3,<5"
 copernicusmarine = ">=2.4.1,<3"
