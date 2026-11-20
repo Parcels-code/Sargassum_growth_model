@@ -2,20 +2,32 @@ import numpy as np
 
 
 def make_presence_grid(x, y, x_edges, y_edges, valid_mask):
-    """Convert point coordinates to a boolean presence/absence grid."""
+    """Convert point coordinates to a presence grid, with NaN for invalid cells."""
     valid = np.isfinite(x) & np.isfinite(y)
     h, _, _ = np.histogram2d(y[valid], x[valid], bins=[y_edges, x_edges])
-    grid = h > 0
+    grid = (h > 0).astype(float)
     grid[~valid_mask] = np.nan
     return grid
 
 
 def tss(obs, pred):
-    """Compute TSS = sensitivity + specificity - 1 from two boolean grids."""
+    """Compute TSS = sensitivity + specificity - 1 from two presence grids."""
+    obs = np.asarray(obs)
+    pred = np.asarray(pred)
+    if obs.shape != pred.shape:
+        raise ValueError("obs and pred must have the same shape")
+
+    valid = np.isfinite(obs) & np.isfinite(pred)
+    obs = obs[valid].astype(bool)
+    pred = pred[valid].astype(bool)
+
     tp = np.logical_and(obs, pred).sum()
     fn = np.logical_and(obs, ~pred).sum()
     fp = np.logical_and(~obs, pred).sum()
     tn = np.logical_and(~obs, ~pred).sum()
+
+    if tp + fn == 0 or tn + fp == 0:
+        return np.nan
 
     sensitivity = tp / (tp + fn)
     specificity = tn / (tn + fp)
@@ -38,8 +50,8 @@ def compute_presence_grids(x_obs, y_obs, x_pred, y_pred, brightness, DX):
     pred_grid = make_presence_grid(x_pred, y_pred, x_edges, y_edges, valid_mask)
 
     # 4) Compute agreement grid
-    agreement = (pred_grid.astype(int) + 2 * obs_grid.astype(int)).astype(float)
-    agreement[~valid_mask] = np.nan
+    agreement = np.full(valid_mask.shape, np.nan)
+    agreement[valid_mask] = pred_grid[valid_mask] + 2 * obs_grid[valid_mask]
 
     return obs_grid, pred_grid, agreement, x_edges, y_edges
 
