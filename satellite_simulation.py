@@ -22,21 +22,18 @@ default_dict = {
     "runtime": 31,
 }
 
-for z_lower in [1, 0.5, 0.25, 0, "surface"]:
-    for wind_coeff in [0.0, 0.01, 0.02, 0.03]:
-        new_dict = default_dict.copy()
-        new_dict["z_lower"] = z_lower
-        new_dict["wind_coeff"] = wind_coeff
-        all_exps.append(new_dict)
+for runtime in [31, 60, 90]:
+    for z_lower in [1, 0.5, 0.25, 0, "surface"]:
+        for wind_coeff in [0.0, 0.01, 0.02, 0.03]:
+            new_dict = default_dict.copy()
+            new_dict["z_lower"] = z_lower
+            new_dict["wind_coeff"] = wind_coeff
+            new_dict["runtime"] = runtime
+            all_exps.append(new_dict)
 
 for month in [7, 10, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12]:
     new_dict = default_dict.copy()
     new_dict["month"] = month
-    all_exps.append(new_dict)
-
-for runtime in [31, 60, 90]:
-    new_dict = default_dict.copy()
-    new_dict["runtime"] = runtime
     all_exps.append(new_dict)
 
 for k_N in [0.001, 0.000129, 0.01]:
