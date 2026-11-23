@@ -6,5 +6,7 @@
 #SBATCH -o log.%x.%j.o
 #SBATCH -e log.%x.%j.e
 
+# create apptainer with `apptainer build --fakeroot parcels.sif parcels.def`
+
 cd ~/Sargassum_growth_model
-pixi run python -u satellite_simulation.py
+apptainer run --bind /project/parcels:/project/parcels parcels.sif python -u basin_simulation.py

@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: ghcr.io/prefix-dev/pixi:latest
+
+%files
+  pixi.toml /app/pixi.toml
+  pixi.lock /app/pixi.lock
+  pyproject.toml /app/pyproject.toml
+  src /app/src
+
+%post
+  cd /app
+  pixi install --locked
+  pixi shell-hook -s bash > /app/activate.sh
+
+%runscript
+  exec /bin/bash -c '. /app/activate.sh && exec "$@"' bash "$@"
